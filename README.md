@@ -57,7 +57,7 @@ Before we proceed, please do this now:
 
 1. Clone this repo:
     ```bash
-    git clone https://github.com/appdevgbb/pattern-refinitiv-on-azure
+    git clone https://github.com/appdevgbb/Project-Stormbreaker
     ```
 1. If you are using VS Code, install the Terraform [extension](https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform).
 2. Install or check if `jq`, `terraform` and `az-cli` are installed on your system.
