@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx-blob
+spec:
+  nodeSelector:
+    "kubernetes.io/os": linux
+  containers:
+    - image: mcr.microsoft.com/oss/nginx/nginx:1.17.3-alpine
+      name: nginx-blob
+      volumeMounts:
+        - name: blob01
+          mountPath: "/mnt/blob"
+          readOnly: false
+  volumes:
+    - name: blob01
+      persistentVolumeClaim:
+        claimName: pvc-blob
