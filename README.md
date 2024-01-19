@@ -2,14 +2,14 @@
 
 Running simulation models on Azure Kubernetes Services.
 
-![](assets/logo.png)
+<p align="center"><img src="https://github.com/appdevgbb/Project-Stormbreaker/blob/main/assets/logo.jpg" width="250" height="250"></p>
 
 ## Target Audience
 The target audience for this pattern is anyone that is looking for a deployment of ADCIRC/SWAN on Azure Kubernetes Services. This example uses Terraform as the Infrastructure as Code.
 
 ## Components of this solution
 
-![](assets/assets.png)
+![](assets/diagram.png)
 
  - [x] [Azure Kubernetes Services](https://learn.microsoft.com/en-us/azure/aks/)
  - [x] [Azure Data Lake Storage Gen2 with HNM and NFSv3](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-feature-support-in-storage-accounts)
