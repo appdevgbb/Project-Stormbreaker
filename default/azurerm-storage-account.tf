@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "stormbreaker" {
-  name                     = "stormbreakeracc"
+  name                     = "stormbreakerstor${var.suffix}"
   location                 = azurerm_resource_group.default.location
   resource_group_name      = azurerm_resource_group.default.name
   account_tier             = "Premium"
@@ -7,7 +7,7 @@ resource "azurerm_storage_account" "stormbreaker" {
   account_kind             = "BlockBlobStorage"
   is_hns_enabled           = "true"
   nfsv3_enabled            = "true"
-
+  
   network_rules {
     default_action         = "Deny"
     bypass                 = ["AzureServices"]
@@ -16,11 +16,23 @@ resource "azurerm_storage_account" "stormbreaker" {
 
 }
 
-# resource "azurerm_storage_data_lake_gen2_filesystem" "example" {
-#   name               = "example"
-#   storage_account_id = azurerm_storage_account.stormbreaker.id
+resource "azurerm_role_assignment" "storage_blob_data_owner" {
+  scope                = azurerm_storage_account.stormbreaker.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
 
-#   properties = {
-#     hello = "aGVsbG8="
-#   }
-# }
+resource "azurerm_role_assignment" "storage_contributor" {
+  scope                = azurerm_storage_account.stormbreaker.id
+  role_definition_name = "Owner"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "filesystem" {
+  name               = "input"
+  storage_account_id = azurerm_storage_account.stormbreaker.id
+  depends_on         = [
+    azurerm_role_assignment.storage_blob_data_owner,
+    azurerm_role_assignment.storage_contributor,
+  ]
+}

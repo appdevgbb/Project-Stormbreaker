@@ -6,7 +6,7 @@
  * The `public_network_access_enabled` parameter is set to `false`, which means that the registry can only be accessed from within the virtual network.
  */
 resource "azurerm_container_registry" "default" {
-  name                          = "stormbreakerACR"
+  name                          = "stormbreakerACR${var.prefix}"
   location                      = azurerm_resource_group.default.location
   resource_group_name           = azurerm_resource_group.default.name
   sku                           = "Standard"

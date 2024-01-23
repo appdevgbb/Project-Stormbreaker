@@ -21,13 +21,6 @@ resource "azurerm_role_assignment" "aks-mi-roles-vnet-rg" {
 }
 
 /* Network */
-resource "azurerm_role_assignment" "aks-mi-roles-aks-stormbreaker" {
-  scope                = azurerm_virtual_network.stormbreaker-vnet.id
-  role_definition_name = "Network Contributor"
-  principal_id         = azurerm_user_assigned_identity.managed-id.principal_id
-}
-
-/* vnet */
 resource "azurerm_role_assignment" "aks-mi-roles-default-vnet" {
   scope                = azurerm_virtual_network.stormbreaker-vnet.id
   role_definition_name = "Network Contributor"

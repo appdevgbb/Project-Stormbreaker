@@ -13,7 +13,7 @@
  * @optional tags A mapping of tags to assign to the dashboard.
  */
 resource "azurerm_dashboard_grafana" "stormbreaker-grafana" {
-  name                              = "stormbreaker-grafana"
+  name                              = "stormbreaker-grafana${var.suffix}"
   resource_group_name               = azurerm_resource_group.default.name
   location                          = azurerm_resource_group.default.location
   api_key_enabled                   = true

@@ -41,3 +41,11 @@ output "acr" {
   value = azurerm_container_registry.default
   sensitive = true
 }
+
+output "storage_account_name" {
+  value = azurerm_storage_account.stormbreaker.name
+}
+
+output "container_name" {
+  value = azurerm_storage_data_lake_gen2_filesystem.filesystem.name
+}
