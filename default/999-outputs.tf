@@ -49,3 +49,7 @@ output "storage_account_name" {
 output "container_name" {
   value = azurerm_storage_data_lake_gen2_filesystem.filesystem.name
 }
+
+output "azure_monitor_workspace_id" {
+  value = azapi_resource.azure_monitor_workspace.id
+}

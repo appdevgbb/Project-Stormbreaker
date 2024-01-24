@@ -17,6 +17,8 @@ set -e
 # - jq
 # - terraform
 
+source install-demo.sh
+
 __usage="
 Available Commands:
     [-x  action]        action to be executed.
@@ -32,35 +34,6 @@ usage() {
   echo "usage: ${0##*/} [options]"
   echo "${__usage/[[:space:]]/}"
   exit 1
-}
-
-# We need the following providers for this demo
-# - Microsoft.ContainerService/AKS-PrometheusAddonPreview
-# - Microsoft.ContainerService/EnableWorkloadIdentityPreview
-# - Microsoft.ContainerService/EnableEncryptionAtHostPreview
-# - Microsoft.Compute/EncryptionAtHost
-demo_providers() {
-  az extension update --name aks-preview
-
-  local _AZURE_NAMESPACE=$(echo $1 | awk -F '/' '{print $1}')
-  local _FLAGS=$(echo $1 | awk -F '/' '{print $2}')
-
-  echo "Checking if " $1 " is registered"
-  for feature in $(echo ${_FLAGS}); do
-    is_featured_registered="Unregistered"
-    is_featured_registered=$(az feature register --namespace ${_AZURE_NAMESPACE} --name ${feature} -o json | jq -r .properties.state)
-
-    while ! true; do
-      if [[ "${is_featured_registered}" != "Registered" ]]; then
-        echo "Featured state:" $is_featured_registered
-        is_featured_registered=$(az feature show --namespace ${_AZURE_NAMESPACE} --name ${feature} -o json | jq -r '.properties.state')
-        sleep 3
-      fi
-    done
-  done
-  # When the status reflects Registered, refresh the registration of the namespace resource provider by using
-  # the az provider register command:
-  az provider register --namespace ${_AZURE_NAMESPACE}
 }
 
 checkDependencies() {

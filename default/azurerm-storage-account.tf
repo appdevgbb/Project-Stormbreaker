@@ -10,10 +10,10 @@ resource "azurerm_storage_account" "stormbreaker" {
   
   network_rules {
     default_action         = "Deny"
-    bypass                 = ["AzureServices"]
+    bypass                 = ["AzureServices", "Logging", "Metrics"]
     virtual_network_subnet_ids = [azurerm_subnet.stormbreaker-cluster.id]
+    ip_rules = [data.http.myip.response_body]
   }
-
 }
 
 resource "azurerm_role_assignment" "storage_blob_data_owner" {
@@ -24,7 +24,7 @@ resource "azurerm_role_assignment" "storage_blob_data_owner" {
 
 resource "azurerm_role_assignment" "storage_contributor" {
   scope                = azurerm_storage_account.stormbreaker.id
-  role_definition_name = "Owner"
+  role_definition_name = "Contributor"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
@@ -34,5 +34,6 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "filesystem" {
   depends_on         = [
     azurerm_role_assignment.storage_blob_data_owner,
     azurerm_role_assignment.storage_contributor,
+    azurerm_storage_account.stormbreaker
   ]
 }

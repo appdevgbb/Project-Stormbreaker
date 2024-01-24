@@ -10,7 +10,7 @@ spec:
       name: nginx-blob
       volumeMounts:
         - name: blob01
-          mountPath: "/mnt/blob"
+          mountPath: "/mnt/input"
           readOnly: false
   volumes:
     - name: blob01

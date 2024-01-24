@@ -7,3 +7,4 @@ default/.DS_Store
 .DS_Store
 default/distfiles/demotools.tar.gz
 default/tfplan
+default/config

@@ -12,11 +12,19 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.88.0"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = ">=1.5.0"
+    }
   }
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+     prevent_deletion_if_contains_resources = false
+    }
+    }
 }
 
 data "azurerm_subscription" "current" {
@@ -24,6 +32,9 @@ data "azurerm_subscription" "current" {
 
 data "azurerm_client_config" "current" {}
 
+data "http" "myip" {
+  url = "https://api.ipify.org/"
+}
 
 resource "random_string" "suffix" {
   length  = 4
