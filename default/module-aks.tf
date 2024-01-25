@@ -68,6 +68,7 @@ module "aks" {
     dns_service_ip          = "10.174.128.10"
     admin_username          = var.admin_username
     ssh_key                 = "~/.ssh/id_rsa.pub"
+    blob_driver_enabled     = true
   }
 
   default_node_pool = {

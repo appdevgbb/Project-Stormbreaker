@@ -57,6 +57,8 @@ variable "aks_settings" {
     dns_service_ip          = string
     admin_username          = string
     ssh_key                 = string
+    blob_driver_enabled     = bool
+  
   })
   default = {
     kubernetes_version      = null
@@ -71,6 +73,8 @@ variable "aks_settings" {
     dns_service_ip          = "10.174.128.10"
     admin_username          = "azureuser"
     ssh_key                 = null
+    blob_driver_enabled     = false
+
   }
 }
 

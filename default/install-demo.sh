@@ -15,7 +15,6 @@ load_env() {
   export AKS_CLUSTER_NAME=$(echo "$TF_OUTPUTS" | jq -r .aks_cluster_name.value)
   export AZ_MONITOR_WORKSPACE_ID=$(echo $TF_OUTPUTS | jq -r .azure_monitor_workspace_id.value)
   export GRAFANA_RESOURCE_ID=$(echo $TF_OUTPUTS | jq -r .grafana_resource_id.value)
-  export KUBECONFIG=$(echo $TF_OUTPUTS | jq -r .kubeconfig_raw.value)
   export RESOURCE_GROUP_NAME=$(echo $TF_OUTPUTS | jq -r .resource_group_name.value)
   export STORAGE_ACCOUNT=$(echo $TF_OUTPUTS | jq -r .storage_account_name.value)
   export CONTAINER_NAME=$(echo $TF_OUTPUTS | jq -r .container_name.value)
@@ -69,7 +68,7 @@ create_nfs_workload() {
 }
 
 do_generate_kubeconfig(){
-  terraform output kubeconfig -raw > config
+  terraform output -raw kubeconfig > config
 }
 # a test workload
 do_deploy_nfs_workload(){

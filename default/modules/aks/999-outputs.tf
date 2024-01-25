@@ -9,5 +9,5 @@ data "azurerm_kubernetes_cluster" "stormbreaker-cluster" {
 }
 
 output "kube_config" {
-  value = data.azurerm_kubernetes_cluster.stormbreaker-cluster.kube_config
+  value = data.azurerm_kubernetes_cluster.stormbreaker-cluster.kube_config_raw
 }

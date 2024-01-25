@@ -63,6 +63,10 @@ resource "azurerm_kubernetes_cluster" "dev" {
     outbound_type     = var.aks_settings.private_cluster_enabled == true ? "userDefinedRouting" : "loadBalancer"
   }
 
+  storage_profile {
+    blob_driver_enabled = var.aks_settings.blob_driver_enabled
+  }
+
   oms_agent {
     log_analytics_workspace_id = var.log_analytics_workspace
     msi_auth_for_monitoring_enabled = true

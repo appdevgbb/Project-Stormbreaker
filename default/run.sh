@@ -88,7 +88,8 @@ destroy() {
     terraform.tfstate.backup \
     tfplan \
     .terraform \
-    .terraform.lock.hcl
+    .terraform.lock.hcl \
+    config  
 }
 
 run() {
