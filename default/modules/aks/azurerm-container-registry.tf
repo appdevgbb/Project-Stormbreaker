@@ -14,6 +14,25 @@
  * - azurerm_role_assignment.mi-access-to-acr: The role assignment for the user-assigned identity.
  * 
  */
+resource "azurerm_private_endpoint" "acr" {
+  name                = "${local.cluster_name}-acr-endpoint"
+  location            = var.resource_group.location
+  resource_group_name = var.resource_group.name
+  subnet_id           = var.acr_subnet_id
+
+  private_service_connection {
+    name                           = "${local.cluster_name}-acr-connection"
+    private_connection_resource_id = var.container_registry_id
+    is_manual_connection           = false
+    subresource_names              = ["registry"]
+  }
+
+  private_dns_zone_group {
+    name                 = "acr-private-endpoint-group"
+    private_dns_zone_ids = var.acr_private_dns_zone_ids
+  }
+}
+
 resource "azurerm_role_assignment" "mi-access-to-acr" {
   scope                = var.container_registry_id
   role_definition_name = "AcrPull"

@@ -9,7 +9,7 @@ resource "azurerm_container_registry" "default" {
   name                          = "stormbreakerACR${var.prefix}"
   location                      = azurerm_resource_group.default.location
   resource_group_name           = azurerm_resource_group.default.name
-  sku                           = "Standard"
-  admin_enabled                 = true
+  sku                           = "Premium"
+  admin_enabled                 = false
   public_network_access_enabled = true
 }

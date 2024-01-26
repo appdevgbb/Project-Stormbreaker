@@ -13,10 +13,16 @@ spec:
       name: hec-ras
       command: ["/sim/run.sh","-x","steady"]
       volumeMounts:
-        - name: blob01
-          mountPath: "/mnt/"
+        - name: input
+          mountPath: "/mnt/input"
+          readOnly: false
+        - name: output
+          mountPath: "/mnt/output"
           readOnly: false
   volumes:
-    - name: blob01
+    - name: input
       persistentVolumeClaim:
         claimName: pvc-blob
+    - name: output
+      persistentVolumeClaim:
+        claimName: pvc-output

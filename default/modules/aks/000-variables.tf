@@ -40,6 +40,10 @@ variable "acr_subnet_id" {
   type = string
 }
 
+variable "acr_private_dns_zone_ids" {
+  type = list(any)
+}
+
 variable "resource_group" {
 }
 

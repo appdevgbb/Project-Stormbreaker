@@ -50,9 +50,12 @@ module "aks" {
   subnet_id      = azurerm_subnet.stormbreaker-cluster.id
   resource_group = azurerm_resource_group.default
 
-  # ACR
+ # ACR
   container_registry_id = azurerm_container_registry.default.id
   acr_subnet_id  = azurerm_subnet.acr.id
+  acr_private_dns_zone_ids = [
+    azurerm_private_dns_zone.acr.id
+  ]
   
   cluster_name        = "stormbreaker-cluster"
   aks_settings = {
