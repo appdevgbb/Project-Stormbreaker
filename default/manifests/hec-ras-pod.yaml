@@ -11,7 +11,10 @@ spec:
   containers:
     - image: stormbreakeracrdc.azurecr.io/hec-ras-6.1-ubi-minimal:8.9-1108.1705420507
       name: hec-ras
-      command: ["/sim/run.sh","-x","steady"]
+      command:
+        - run.sh
+        - -x
+        - geoprem
       volumeMounts:
         - name: blob01
           mountPath: "/mnt/"

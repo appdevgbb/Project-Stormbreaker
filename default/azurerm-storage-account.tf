@@ -37,3 +37,13 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "filesystem" {
     azurerm_storage_account.stormbreaker
   ]
 }
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "filesystem-out" {
+  name               = "output"
+  storage_account_id = azurerm_storage_account.stormbreaker.id
+  depends_on         = [
+    azurerm_role_assignment.storage_blob_data_owner,
+    azurerm_role_assignment.storage_contributor,
+    azurerm_storage_account.stormbreaker
+  ]
+}
