@@ -97,6 +97,16 @@ module "aks" {
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
     }
 
+    "hecraswin" = {
+      vm_size                      = "standard_d4_v5"
+      node_count                   = 1
+      node_labels                  = null
+      node_taints                  = ["layer=hec-ras-win:NoSchedule"]
+      os_type			   = "Windows"
+      proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
+    }
+
+
     "adcirc" = {
       vm_size                      = "standard_d4_v5"
       node_count                   = 1
