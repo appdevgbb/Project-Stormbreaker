@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-adcirc
+data:
+  entrypoint.sh: |-
+    #!/usr/bin/bash
+    MPI_HOST=$(cat /etc/volcano/mpiworker.host | tr "\n" ",")
+    
+    source /opt/spack/share/spack/setup-env.sh
+    spack load adcirc
+    spack load intel-oneapi-mpi@2021.10.0
+    
+    ADCIRC_HOME=$(dirname $(which adcirc)|tail -n1)
+    TEST_DIR=/root/adcirc-testsuite
+    SPACK_STAGE=/tmp/root/spack-stage
+    
+    # for some reason, adcircResultsComparison doesn't get copied 
+    # into to the directory where adcirc is ... This fixes that
+    find $SPACK_STAGE -name adcircResultsComparison -type f -exec cp {} $ADCIRC_HOME \;
+    
+    mkdir -p /var/run/sshd; /usr/sbin/sshd
+    sleep 15
+    # run the test with ADCIRC
+    mpiexec --host ${MPI_HOST} -np 2 $TEST_DIR/RunSingleTest.sh $ADCIRC_HOME $TEST_DIR/adcirc/adcirc_katrina-2d/
+    tail -f $TEST_DIR/adcirc/adcirc_katrina-2d/adcirc_log.txt
