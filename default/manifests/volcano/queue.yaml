@@ -6,4 +6,5 @@ spec:
   weight: 1
   reclaimable: false
   capability:
-    cpu: 2
+    cpu: 6 # each ADCIRC node has 4 vCPU (standard_d4_v5). 
+           # Letting k8s use 1 and the rest for ADCIRC

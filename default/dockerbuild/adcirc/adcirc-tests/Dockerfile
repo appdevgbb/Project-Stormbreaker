@@ -19,7 +19,7 @@ RUN spack install --keep-stage \
 
 # add the necessary components for MPI
 RUN apt-get update --fix-missing \
-    && apt-get install -y ssh \
+    && apt-get install -y ssh libopenmpi-dev openmpi-bin \
     && apt-get clean
 
 # for testing only:

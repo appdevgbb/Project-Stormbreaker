@@ -40,6 +40,15 @@ spec:
       name: mpiworker
       template:
         spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: agentpool
+                    operator: In
+                    values:
+                    - adcirc
           containers:
             - name: mpimaster
               image: stormbreakeracrdc.azurecr.io/adcirc-tests:55.dev-alpha

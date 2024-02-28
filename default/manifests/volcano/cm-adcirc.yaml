@@ -9,7 +9,6 @@ data:
     
     source /opt/spack/share/spack/setup-env.sh
     spack load adcirc
-    spack load intel-oneapi-mpi@2021.10.0
     
     ADCIRC_HOME=$(dirname $(which adcirc)|tail -n1)
     TEST_DIR=/root/adcirc-testsuite
@@ -20,7 +19,5 @@ data:
     find $SPACK_STAGE -name adcircResultsComparison -type f -exec cp {} $ADCIRC_HOME \;
     
     mkdir -p /var/run/sshd; /usr/sbin/sshd
-    sleep 15
     # run the test with ADCIRC
-    mpiexec --host ${MPI_HOST} -np 2 $TEST_DIR/RunSingleTest.sh $ADCIRC_HOME $TEST_DIR/adcirc/adcirc_katrina-2d/
-    tail -f $TEST_DIR/adcirc/adcirc_katrina-2d/adcirc_log.txt
+    /usr/bin/mpiexec --allow-run-as-root --host ${MPI_HOST} -np 2 $TEST_DIR/RunSingleTest.sh $ADCIRC_HOME $TEST_DIR/adcirc/adcirc_katrina-2d/ 
