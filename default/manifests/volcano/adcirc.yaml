@@ -1,3 +1,5 @@
+# ADCIRC compiled with OpenMPI
+# models are accessible on a NFS share
 apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
@@ -18,7 +20,7 @@ spec:
         spec:
           containers:
             - name: mpimaster
-              image: stormbreakeracrdc.azurecr.io/adcirc-tests:55.dev-alpha
+              image: stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-alpha
               command:
               - /bin/entrypoint.sh
               volumeMounts:
@@ -26,6 +28,12 @@ spec:
                 mountPath: /bin/entrypoint.sh
                 readOnly: true
                 subPath: entrypoint.sh
+              - name: input
+                mountPath: "/mnt/input"
+                readOnly: false
+              - name: output
+                mountPath: "/mnt/output"
+                readOnly: false
               ports:
                 - containerPort: 22
                   name: mpijob-port
@@ -35,6 +43,12 @@ spec:
             configMap:
               defaultMode: 0700
               name: cm-adcirc
+          - name: input
+            persistentVolumeClaim:
+              claimName: pvc-input
+          - name: output
+            persistentVolumeClaim:
+              claimName: pvc-output
           restartPolicy: OnFailure
     - replicas: 2
       name: mpiworker
@@ -51,7 +65,7 @@ spec:
                     - adcirc
           containers:
             - name: mpimaster
-              image: stormbreakeracrdc.azurecr.io/adcirc-tests:55.dev-alpha
+              image: stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-alpha
               command:
               - /bin/entrypoint.sh
               volumeMounts:
@@ -59,6 +73,12 @@ spec:
                 mountPath: /bin/entrypoint.sh
                 readOnly: true
                 subPath: entrypoint.sh
+              - name: input
+                mountPath: "/mnt/input"
+                readOnly: false
+              - name: output
+                mountPath: "/mnt/output"
+                readOnly: false
               ports:
                 - containerPort: 22
                   name: mpijob-port
@@ -68,4 +88,10 @@ spec:
             configMap:
               defaultMode: 0700
               name: cm-adcirc-worker
+          - name: input
+            persistentVolumeClaim:
+              claimName: pvc-input
+          - name: output
+            persistentVolumeClaim:
+              claimName: pvc-output
           restartPolicy: OnFailure

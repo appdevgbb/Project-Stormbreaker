@@ -5,19 +5,35 @@ metadata:
 data:
   entrypoint.sh: |-
     #!/usr/bin/bash
-    MPI_HOST=$(cat /etc/volcano/mpiworker.host | tr "\n" ",")
-    
+    #apt update && apt install -y openssh-server
     source /opt/spack/share/spack/setup-env.sh
     spack load adcirc
     
     ADCIRC_HOME=$(dirname $(which adcirc)|tail -n1)
-    TEST_DIR=/root/adcirc-testsuite
     SPACK_STAGE=/tmp/root/spack-stage
+
+    TEST_DIR=/mnt/input/adcirc-testsuite
+    TEST_CASE=adcirc/adcirc_katrina-2d-parallel
     
     # for some reason, adcircResultsComparison doesn't get copied 
     # into to the directory where adcirc is ... This fixes that
-    find $SPACK_STAGE -name adcircResultsComparison -type f -exec cp {} $ADCIRC_HOME \;
-    
-    mkdir -p /var/run/sshd; /usr/sbin/sshd
+    find $SPACK_STAGE -name adcircResultsComparison -type f -exec cp {} /usr/bin \;
+    cp $(which adcprep) /usr/bin
+    cp $(which mpiexec) /usr/bin
+    cp $(which orted) /usr/bin
+    cp $ADCIRC_HOME/* /usr/bin
+
+    #mkdir -p /var/run/sshd; /usr/sbin/sshd
     # run the test with ADCIRC
-    /usr/bin/mpiexec --allow-run-as-root --host ${MPI_HOST} -np 2 $TEST_DIR/RunSingleTest.sh $ADCIRC_HOME $TEST_DIR/adcirc/adcirc_katrina-2d/ 
+    MPI_HOST=$(cat /etc/volcano/mpiworker.host | tr "\n" ",")
+    #/usr/bin/mpiexec --allow-run-as-root --host ${MPI_HOST} -np 2 $TEST_DIR/RunSingleTest.sh $ADCIRC_HOME $TEST_DIR/adcirc/adcirc_katrina-2d/ 
+    #${TEST_DIR}/RunSingleTest.sh ${ADCIRC_HOME} ${TEST_DIR}/${TEST_CASE} 
+    
+    # test with Gustav(2008)
+    # https://en.wikipedia.org/wiki/Hurricane_Gustav
+    cd /mnt/output/gustav
+    np=2
+    adcprep --np $np --partmesh >  adcprep.log
+    adcprep --np $np --prepall  >> adcprep.log
+    mpiexec --allow-run-as-root --hostfile /etc/volcano/mpiworker.host -np $np padcirc
+    tail -f --retry /mnt/output/gustav/padcirc_log.txt
