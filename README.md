@@ -7,6 +7,28 @@ Running simulation models on Azure Kubernetes Services.
 ## Target Audience
 The target audience for this pattern is anyone that is looking for a deployment of ADCIRC/SWAN on Azure Kubernetes Services. This example uses Terraform as the Infrastructure as Code.
 
+ADCIRC:
+
+The Advanced Circulation Model for Coastal Planning (ADCIRC) is a powerful computing program used for predicting water levels and currents in coastal areas. It's applied in a variety of areas, including storm surge predictions, tide predictions, and coastal circulation patterns. It uses a system of equations based on fluid dynamics and thermodynamics to simulate the behavior of water in these regions.
+
+For example, if a city planner wants to understand how a new pier might impact local currents, ADCIRC could be used to simulate the water movement around the proposed structure, thereby aiding in informed decision-making.
+
+HEC-RAS:
+
+The Hydrologic Engineering Center's River Analysis System (HEC-RAS) is a software developed by the U.S. Army Corps of Engineers. It's used for simulating the flow of water in rivers, channels, and other bodies of water for purposes such as floodplain management, dam break studies, and bridge design.
+
+For instance, an engineer might use HEC-RAS to model how a proposed dam could impact the flow of water in a river, which could help predict potential flooding or ecological impacts.
+
+Running ADCIRC with SWAN:
+
+Simulating WAves Nearshore (SWAN) is a third-generation wave model that computes random, short-crested wind-generated waves in coastal regions and inland waters. ADCIRC can be run with SWAN to provide a more comprehensive and accurate analysis of coastal and marine environments. For instance, this integration can be used to simulate storm surge and wave propagation during a hurricane, providing critical data for emergency planning and response.
+
+ADCIRC in Parallel for Hurricane Simulations:
+
+ADCIRC can be run in parallel to speed up computation time, which is especially useful when simulating complex events like hurricanes. This involves dividing the computational work among multiple processors.
+
+For example, during [Hurricane Gustav](https://en.wikipedia.org/wiki/Hurricane_Gustav), ADCIRC was used in parallel to quickly provide accurate storm surge forecasts. These forecasts played a crucial role in informing evacuation plans and emergency responses, potentially saving lives and property.
+
 ## Components of this solution
 
 ![](assets/diagram.png)
