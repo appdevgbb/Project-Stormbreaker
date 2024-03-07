@@ -5,18 +5,4 @@ metadata:
 data:
   entrypoint.sh: |-
     #!/usr/bin/bash
-    apt update && apt install -y openssh-server
-    source /opt/spack/share/spack/setup-env.sh
-    spack load adcirc
-    ADCIRC_HOME=$(dirname $(which adcirc)|tail -n1)
-    SPACK_STAGE=/tmp/root/spack-stage
-    
-    # for some reason, adcircResultsComparison doesn't get copied 
-    # into to the directory where adcirc is ... This fixes that
-    find $SPACK_STAGE -name adcircResultsComparison -type f -exec cp {} /usr/bin \;
-    cp $(which adcprep) /usr/bin
-    cp $(which mpiexec) /usr/bin
-    cp $(which orted) /usr/bin
-    cp $ADCIRC_HOME/* /usr/bin
-
     mkdir -p /var/run/sshd; /usr/sbin/sshd -D

@@ -20,7 +20,7 @@ RUN spack install --keep-stage \
 
 # add the necessary components for MPI
 RUN apt-get update --fix-missing \
-    && apt-get install -y ssh
+    && apt-get install -y openssh-server
 
 # for testing only:
 # git clone the adcirc-testsuite
@@ -29,8 +29,12 @@ RUN apt-get update --fix-missing \
 # for some reason, adcircResultsComparison doesn't get copied 
 # into to the directory where adcirc is ... This fixes that
 RUN spack load adcirc \
-    && find /tmp/root/spack-stage/ -name adcircResultsComparison -type f -exec cp {} $(dirname $(which adcirc)|tail -n 1) \;
-
-RUN echo spack load adcirc >> /root/.bashrc
+    && find /tmp/root/spack-stage/ -name adcircResultsComparison -type f -exec cp {} /usr/bin \; \
+    && SPACK_STAGE=/tmp/root/spack-stage \
+    && ADCIRC_HOME=$(dirname $(which adcirc)|tail -n1) \
+    && cp $(which adcprep) /usr/bin \
+    && cp $(which mpiexec) /usr/bin \
+    && cp $(which orted) /usr/bin \
+    && cp $ADCIRC_HOME/* /usr/bin
 
 CMD mkdir -p /var/run/ssh; /usr/sbin/sshd
