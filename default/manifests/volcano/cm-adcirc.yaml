@@ -4,20 +4,11 @@ metadata:
   name: cm-adcirc
 data:
   entrypoint.sh: |-
-    #!/usr/bin/bash
-    MPI_HOST=$(cat /etc/volcano/mpiworker.host | tr "\n" ",")
-    
-    source /opt/spack/share/spack/setup-env.sh
-    spack load adcirc
-    
-    ADCIRC_HOME=$(dirname $(which adcirc)|tail -n1)
-    TEST_DIR=/root/adcirc-testsuite
-    SPACK_STAGE=/tmp/root/spack-stage
-    
-    # for some reason, adcircResultsComparison doesn't get copied 
-    # into to the directory where adcirc is ... This fixes that
-    find $SPACK_STAGE -name adcircResultsComparison -type f -exec cp {} $ADCIRC_HOME \;
-    
+    #!/usr/bin/bash -l
     mkdir -p /var/run/sshd; /usr/sbin/sshd
-    # run the test with ADCIRC
-    /usr/bin/mpiexec --allow-run-as-root --host ${MPI_HOST} -np 2 $TEST_DIR/RunSingleTest.sh $ADCIRC_HOME $TEST_DIR/adcirc/adcirc_katrina-2d/ 
+
+    # test with Gustav(2008)
+    # https://en.wikipedia.org/wiki/Hurricane_Gustav
+    cd /mnt/output/TEST_2
+    ./run.sh
+    tail -f /mnt/output/TEST_2/padcirc_log.txt
