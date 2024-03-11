@@ -1,0 +1,23 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: adcirc-debug
+spec:
+  containers:
+    - image: stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-2
+      name: adcirc-debug
+      command: ["sh","-c","sleep 3600"]
+      volumeMounts:
+        - name: input
+          mountPath: "/mnt/input"
+          readOnly: false
+        - name: output
+          mountPath: "/mnt/output"
+          readOnly: false
+  volumes:
+    - name: input
+      persistentVolumeClaim:
+        claimName: pvc-input
+    - name: output
+      persistentVolumeClaim:
+        claimName: pvc-output

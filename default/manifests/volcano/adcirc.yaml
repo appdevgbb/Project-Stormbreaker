@@ -29,6 +29,20 @@ spec:
                     operator: In
                     values:
                     - adcirc
+          initContainers:
+            - command:
+                - /bin/bash
+                - -c
+                - |
+                  until [[ "$(kubectl get pod -l volcano.sh/job-name=lm-mpi-job,volcano.sh/task-spec=mpiworker -o json | jq '.items | length')" != 0 ]]; do
+                    echo "Waiting for MPI worker pods..."
+                    sleep 3
+                  done
+                  echo "Waiting for MPI worker pods to be ready..."
+                  kubectl wait pod -l volcano.sh/job-name=lm-mpi-job,volcano.sh/task-spec=mpiworker --for=condition=Ready --timeout=600s
+              image: mcr.microsoft.com/oss/kubernetes/kubectl:v1.26.3
+              name: wait-for-workers
+          serviceAccount: sa-mpi-worker-view
           containers:
             - name: mpimaster
               image: stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-2
@@ -61,7 +75,7 @@ spec:
             persistentVolumeClaim:
               claimName: pvc-output
           restartPolicy: OnFailure
-    - replicas: 2
+    - replicas: 3
       name: mpiworker
       template:
         spec:  

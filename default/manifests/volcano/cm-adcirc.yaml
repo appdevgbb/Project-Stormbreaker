@@ -5,10 +5,12 @@ metadata:
 data:
   entrypoint.sh: |-
     #!/usr/bin/bash -l
+    #TEST_DIR="/mnt/output/TEST_2"
+    WORK_DIR="/mnt/input/adcirc-testsuite"
+    TEST_DIR="/mnt/input/adcirc-testsuite/adcirc/adcirc_katrina-2d-parallel/"
     mkdir -p /var/run/sshd; /usr/sbin/sshd
 
-    # test with Gustav(2008)
-    # https://en.wikipedia.org/wiki/Hurricane_Gustav
-    cd /mnt/output/TEST_2
-    ./run.sh
-    tail -f /mnt/output/TEST_2/padcirc_log.txt
+    rm ${TEST_DIR}/*.log
+    cd ${TEST_DIR} 
+    #./RunSingleTest.sh /usr/bin ${TEST_DIR}
+    ./run.sh /usr/bin 0.001
