@@ -91,7 +91,7 @@ module "aks" {
   user_node_pools = {
     "hecras" = {
       vm_size                      = "standard_d4_v5"
-      node_count                   = 1
+      node_count                   = 0
       node_labels                  = null
       node_taints                  = ["layer=hec-ras:NoSchedule"]
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
@@ -99,19 +99,19 @@ module "aks" {
 
     "hecraswin" = {
       vm_size                      = "standard_d4_v5"
-      node_count                   = 1
+      node_count                   = 0
       node_labels                  = null
       node_taints                  = ["layer=hec-ras-win:NoSchedule"]
-      os_type			   = "Windows"
+      os_type			                 = "Windows"
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
     }
 
 
-    "adcirc" = {
-      vm_size                      = "standard_d4_v5"
-      node_count                   = 1
+    "adcirchpc" = {
+      vm_size                      = "Standard_HB120-16rs_v3"
+      node_count                   = 0
       node_labels                  = null
-      node_taints                  = ["layer=adcirc:NoSchedule"]
+      node_taints                  = null
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
     }
   }
