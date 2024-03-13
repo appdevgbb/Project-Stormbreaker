@@ -5,7 +5,7 @@ kind: Job
 metadata:
   name: lm-mpi-job
 spec:
-  minAvailable: 1
+  minAvailable: 2
   schedulerName: volcano
   priorityClassName: high-priority
   plugins:
@@ -28,7 +28,7 @@ spec:
                   - key: agentpool
                     operator: In
                     values:
-                    - adcirc
+                    - adcirchpc
           initContainers:
             - command:
                 - /bin/bash
@@ -45,7 +45,11 @@ spec:
           serviceAccount: sa-mpi-worker-view
           containers:
             - name: mpimaster
-              image: stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-2
+              image:  stormbreakeracrdc.azurecr.io/adcird-hpc:55.dev.openmpi-zen3-1 
+              securityContext:
+                capabilities:
+                  add: ["IPC_LOCK"]
+                privileged: true
               command:
               - /bin/entrypoint.sh
               volumeMounts:
@@ -74,8 +78,8 @@ spec:
           - name: output
             persistentVolumeClaim:
               claimName: pvc-output
-          restartPolicy: OnFailure
-    - replicas: 1
+          restartPolicy: Never
+    - replicas: 2
       name: mpiworker
       template:
         spec:  
@@ -90,7 +94,16 @@ spec:
                     - adcirchpc
           containers:
             - name: mpiworker
-              image: stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-2
+              image:  stormbreakeracrdc.azurecr.io/adcird-hpc:55.dev.openmpi-zen3-1
+              securityContext:
+                capabilities:
+                  add: ["IPC_LOCK"]
+                privileged: true
+              resources:
+                requests:
+                  nvidia.com/mlnxnics: 1
+                limits:
+                  nvidia.com/mlnxnics: 1
               command:
               - /bin/sh
               - -c
@@ -103,6 +116,8 @@ spec:
               - name: output
                 mountPath: "/mnt/output"
                 readOnly: false
+              - name: shm
+                mountPath: "/dev/shm"
               ports:
                 - containerPort: 22
                   name: mpijob-port
@@ -114,4 +129,8 @@ spec:
           - name: output
             persistentVolumeClaim:
               claimName: pvc-output
+          - name: shm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 8Gi
           restartPolicy: OnFailure

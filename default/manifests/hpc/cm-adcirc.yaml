@@ -13,6 +13,4 @@ data:
     rm ${TEST_DIR}/*.log
     cd ${TEST_DIR} 
     #./RunSingleTest.sh /usr/bin ${TEST_DIR}
-    ./run.sh 
-    touch a.txt
-    tail -f a.txt
+    ./run.sh 236 118
