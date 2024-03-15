@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-adcirc
+data:
+  entrypoint.sh: |-
+    #!/usr/bin/bash -l
+    TEST_DIR="/mnt/output/TEST_2"
+    # WORK_DIR="/mnt/input/adcirc-testsuite"
+    #TEST_DIR="/mnt/input/adcirc-testsuite/adcirc/adcirc_katrina-2d-parallel/"
+    mkdir -p /var/run/sshd; /usr/sbin/sshd
+
+    rm ${TEST_DIR}/*.log
+    cd ${TEST_DIR} 
+    #./RunSingleTest.sh /usr/bin ${TEST_DIR}
+    #./run.sh 28 14
+
+    NP=240
+    SLOTS=120
+    
+    rm -rf work/*
+    mkdir work/ || true
+    unzip TEST_2.zip -d work/
+    cd work/TEST_2/
+
+    adcprep --np $NP --partmesh > adcprep.txt
+    adcprep --np $NP --prepall  >> adcprep.txt
+
+    echo
+    echo "================== done ====================="
+    echo "Date:   $(date)"
+    echo "retval: $retval"
+    touch padcirc_log.txt
+    mpiexec --allow-run-as-root -np $NP -npernode $SLOTS --bind-to numa --map-by ppr:$SLOTS:node -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc > padcirc_log.txt
