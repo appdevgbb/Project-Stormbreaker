@@ -45,7 +45,7 @@ spec:
           serviceAccount: sa-mpi-worker-view
           containers:
             - name: mpimaster
-              image:  stormbreakeracrdc.azurecr.io/adcird-hpc:55.dev.openmpi-zen3-1 
+              image: stormbreakeracrdc.azurecr.io/adcird-hpc:55.static.ucx.openmpi-zen3-1 
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -94,7 +94,7 @@ spec:
                     - adcirchpc
           containers:
             - name: mpiworker
-              image:  stormbreakeracrdc.azurecr.io/adcird-hpc:55.dev.openmpi-zen3-1
+              image: stormbreakeracrdc.azurecr.io/adcird-hpc:55.static.ucx.openmpi-zen3-1 
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -122,6 +122,8 @@ spec:
                 - containerPort: 22
                   name: mpijob-port
               workingDir: /root
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 0
           volumes:
           - name: input
             persistentVolumeClaim:
@@ -133,4 +135,3 @@ spec:
             emptyDir:
               medium: Memory
               sizeLimit: 8Gi
-          restartPolicy: OnFailure

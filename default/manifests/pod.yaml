@@ -14,7 +14,10 @@ spec:
       - /bin/sh
       - -c
       - |
-        apt update ; apt install -y infiniband-diags vim podman; sleep 3600;
+        apt update ; 
+        apt install -y infiniband-diags vim podman;
+        sed -i 's/# unqualified-search-registries = \["example.com"\]/unqualified-search-registries = \["docker.io"\]/' /etc/containers/registries.conf  
+        sleep 3600;
       volumeMounts:
         - name: input
           mountPath: "/mnt/input"

@@ -18,7 +18,7 @@ RUN MICROARCHFILE=$SPACK_ROOT/lib/spack/external/archspec/json/cpu/microarchitec
     && cat ${MICROARCHFILE}.orig | jq 'del(.microarchitectures.zen3.features[] | select (. == "pku"))' | jq 'del(.microarchitectures.zen.features[] | select (. == "clzero"))' >$MICROARCHFILE
 
 # install openmpi
-RUN spack install openmpi fabrics=auto
+RUN spack install openmpi fabrics=ucx +internal-hwloc +orterunprefix
 # install ADCIRC
 RUN spack install --keep-stage \
     adcirc@55.01 \

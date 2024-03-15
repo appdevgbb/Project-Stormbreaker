@@ -108,8 +108,8 @@ module "aks" {
 
 
     "adcirchpc" = {
-      vm_size                      = "Standard_HB120-16rs_v3"
-      node_count                   = 0
+      vm_size                      = "Standard_HB120rs_v3"
+      node_count                   = 2
       node_labels                  = null
       node_taints                  = null
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id

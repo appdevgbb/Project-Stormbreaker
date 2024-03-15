@@ -34,10 +34,10 @@ kubectl exec -it  podman
 sed -i 's/# unqualified-search-registries = \["example.com"\]/unqualified-search-registries = \["docker.io"\]/' /etc/containers/registries.conf  
 
 # build the container
-podman build --format docker -t acrdcasati.azurecr.io/stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-3 .
+podman build --format docker -t stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-3 .
 
 # login to ACR and push the container to the registry
 podman login ${YOUR_AZURE_CONTAINER_REGISTRIY} -u ${ACR_USER}
-podman push acrdcasati.azurecr.io/stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-3
+podman push stormbreakeracrdc.azurecr.io/adcird-tests:55.dev.openmpi-beta-3
 ```
 
