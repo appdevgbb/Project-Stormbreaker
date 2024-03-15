@@ -62,6 +62,7 @@ checkDependencies() {
     Microsoft.ContainerService/AKS-PrometheusAddonPreview 
     Microsoft.ContainerService/EnableWorkloadIdentityPreview
     Microsoft.ContainerService/EnableEncryptionAtHostPreview
+    Microsoft.ContainerService/AKSInfinibandSupport
     Microsoft.Compute/EncryptionAtHost"
   
   for i in ${_AZURE_FEATURES}; do
