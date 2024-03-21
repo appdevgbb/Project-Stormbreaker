@@ -1,5 +1,5 @@
 #
-# This script provides a set of commands to manage the deployment of resources in Azure and Kubernetes for the Refinitiv pattern on Azure. 
+# This script provides a set of commands to manage the deployment of resources in Azure and Kubernetes for the Refinitiv pattern on Azure.
 # It requires Azure CLI, jq, and terraform to be installed. The available commands are:
 # - install: creates all of the resources in Azure and in Kubernetes
 # - demo: deploy the scripts for the demo
@@ -28,6 +28,8 @@ Available Commands:
         demo            deploy the scripts for the demo
         destroy         deletes all of the components in Azure plus any KUBECONFIG and Terraform files
         show            shows information about the demo environment (e.g.: connection strings)
+        start-adcirc    deployed ADCIRC+SWAN to the cluster
+        stop-adcirc     deletes ADCIRC+SWAN from the cluster
 "
 
 usage() {
@@ -62,11 +64,21 @@ checkDependencies() {
     Microsoft.ContainerService/AKS-PrometheusAddonPreview 
     Microsoft.ContainerService/EnableWorkloadIdentityPreview
     Microsoft.ContainerService/EnableEncryptionAtHostPreview
+    Microsoft.ContainerService/AKSInfinibandSupport
     Microsoft.Compute/EncryptionAtHost"
-  
+
   for i in ${_AZURE_FEATURES}; do
     demo_providers $i
   done
+}
+
+start-adcirc() {
+  kubectl apply -f manifests/hpc/queue.yaml
+  kubectl apply -f manifests/hpc/
+}
+
+stop-adcirc() {
+  kubectl delete -f manifests/hpc/adcirc-hpc.yaml
 }
 
 terraformDance() {
@@ -89,7 +101,7 @@ destroy() {
     tfplan \
     .terraform \
     .terraform.lock.hcl \
-    config  
+    config
 }
 
 run() {
@@ -101,11 +113,13 @@ exec_case() {
   local _opt=$1
 
   case ${_opt} in
-    install)  checkDependencies && run ;;
-    destroy)  destroy ;;
-    demo)     do_demo_bootstrap ;;
-    show)     show ;;
-    *)        usage ;;
+    install) checkDependencies && run ;;
+    destroy) destroy ;;
+    demo) do_demo_bootstrap ;;
+    show) show ;;
+    start-adcirc) start-adcirc ;;
+    stop-adcirc) stop-adcirc ;;
+    *) usage ;;
   esac
   unset _opt
 }
