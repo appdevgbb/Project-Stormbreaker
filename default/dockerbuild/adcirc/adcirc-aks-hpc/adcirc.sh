@@ -3,6 +3,21 @@
 export FC=gfortran
 export CC=gcc
 
+apt-get update && apt-get install -y \
+    automake \
+    autoconf \
+    libtool \
+    gcc \
+    gfortran \
+    wget \
+    make \
+    libxml2-dev \
+    openssh-server \
+    build-essential \
+    m4 \
+    vim \
+    unzip \
+    libcurl4-gnutls-dev
 # make a directory to hold source code for adcirc netcdf related dependencies
 # doesn't matter what you call it
 mkdir -p /home/stormbreaker/src
@@ -50,7 +65,7 @@ tar -xzvf v4.9.2.tar.gz
 cd netcdf-c-4.9.2
 export CPPFLAGS=-I/home/stormbreaker/install/include
 export LDFLAGS=-L/home/stormbreaker/install/lib
-./configure -prefix=/home/stormbreaker/install --disable-byterange  --disable-dap # dap depends on libcurl
+./configure -prefix=/home/stormbreaker/install --disable-dap # dap depends on libcurl
 
 make
 make check
@@ -81,7 +96,6 @@ NETCDF4=enable
 NETCDF4_COMPRESSION=enable
 NETCDFHOME=/home/stormbreaker/install
 
-
 make clobber
 make adcirc
 make padcirc
@@ -89,7 +103,7 @@ cd ../thirdparty/swan
 make clobber
 make config
 
-sed -i 's!(../work/odir4)!../\1!g' macros.inc
+sed -i -E 's!(../work/odir4)!../\1!g' macros.inc
 make punswan 
 make clobber 
 cd ../../work

@@ -1,8 +1,10 @@
 FROM ubuntu:20.04
 
 # Install dependencies  
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update && apt-get install -y \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN echo "America/New_York" > /etc/timezone \
+RUN dpkg-reconfigure -f noninteractive tzdata
+RUN  apt-get update && apt-get install -y \
     automake \
     autoconf \
     libtool \
@@ -14,7 +16,9 @@ RUN DEBIAN_FRONTEND=noninteractive \
     openssh-server \
     build-essential \
     m4 \
-    vim
+    vim \
+    unzip \
+    libcurl4-gnutls-dev
 
 # Set environment variables for compilers  
 ENV FC=gfortran
@@ -33,8 +37,9 @@ RUN wget http://zlib.net/zlib-1.3.1.tar.gz
 RUN wget www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.5.tar.gz
 RUN wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.9.2.tar.gz
 RUN wget https://downloads.unidata.ucar.edu/netcdf-fortran/4.6.1/netcdf-fortran-4.6.1.tar.gz
+RUN wget https://github.com/adcirc/adcirc/releases/download/v55.02/adcirc_v55.02.tar.gz
 
-# Install zlib  
+# Install zlib
 RUN tar -xzvf zlib-1.3.1.tar.gz && \
     cd zlib-1.3.1 && \
     ./configure && \
@@ -52,20 +57,28 @@ RUN tar -xzvf hdf5-1.10.5.tar.gz && \
     cd ../
 
 # Install netcdf c library  
-RUN t
-
+RUN tar -xzvf v4.9.2.tar.gz && \
+    cd netcdf-c-4.9.2 && \
+    export CPPFLAGS=-I/home/stormbreaker/install/include && \
+    export LDFLAGS=-L/home/stormbreaker/install/lib && \
+    ./configure -prefix=/home/stormbreaker/install --disable-dap && \
+    make && \
+    make check && \
+    make install && \
+    cd ../
 
 # Download and install adcirc  
-RUN wget https://github.com/adcirc/adcirc/releases/download/v55.02/adcirc_v55.02.tar.gz && \
-    tar xvzf adcirc_v55.02.tar.gz && \
+ENV LD_LIBRARY_PATH=/home/stormbreaker/install/lib
+RUN tar xvzf adcirc_v55.02.tar.gz && \
     cd adcirc_v55.02/work && \
     make clobber && \
+    sed -i -E 's/#(compiler=gnu)/\1/; s/(compiler=intel)$/#\1/' cmplrflags.mk && \
     make adcirc && \
     make padcirc && \
     cd ../thirdparty/swan && \
     make clobber && \
     make config && \
-    sed -i 's!(../work/odir4)!../\1!g' macros.inc && \
+    sed -i -E 's!(../work/odir4)!../\1!g' macros.inc && \
     make punswan && \
     make clobber && \
     cd ../../work && \
@@ -74,7 +87,7 @@ RUN wget https://github.com/adcirc/adcirc/releases/download/v55.02/adcirc_v55.02
     make adcprep SWAN=enable && \
     make hstime && \
     make aswip && \
-    for i in adcirc adcprep adcswan aswip hstime padcirc padcswan; do cp $i /home/stormbreaker/install/bin/; done
+    for i in adcirc adcprep adcswan aswip hstime padcirc padcswan; do cp $i /usr/local/bin; done
 
 # Set the default command for the image  
 CMD ["bash"]

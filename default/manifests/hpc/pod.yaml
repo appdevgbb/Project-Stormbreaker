@@ -3,8 +3,17 @@ apiVersion: v1
 metadata:
   name: podman
 spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: agentpool
+            operator: In
+            values:
+            - adcirchpc
   containers:
-    - image:  stormbreakeracrdc.azurecr.io/hpccm:base-2
+    - image:  stormbreakeracrdc.azurecr.io/hpccm:base-3
       name: podman-in-a-pod
       securityContext:
         privileged: true
@@ -15,7 +24,8 @@ spec:
       - -c
       - |
         apt update ; 
-        apt install -y infiniband-diags vim kmod;
+        apt install -y infiniband-diags vim kmod python3-pip
+        pip install hpccm
         sleep 360d;
       volumeMounts:
         - name: input
