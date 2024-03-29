@@ -1,0 +1,33 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: podman
+spec:
+  containers:
+    - image:  stormbreakeracrdc.azurecr.io/hpccm:base-2
+      name: podman-in-a-pod
+      securityContext:
+        privileged: true
+        capabilities:
+          add: ["IPC_LOCK", "CAP_SYS_ADMIN", "CAP_MKNOD"]
+      command:
+      - /bin/sh
+      - -c
+      - |
+        apt update ; 
+        apt install -y infiniband-diags vim kmod;
+        sleep 360d;
+      volumeMounts:
+        - name: input
+          mountPath: "/mnt/input"
+          readOnly: false
+        - name: output
+          mountPath: "/mnt/output"
+          readOnly: false
+  volumes:
+    - name: input
+      persistentVolumeClaim:
+        claimName: pvc-input
+    - name: output
+      persistentVolumeClaim:
+        claimName: pvc-output

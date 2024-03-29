@@ -86,7 +86,7 @@ resource "azurerm_kubernetes_cluster" "dev" {
 
   lifecycle {
     ignore_changes = [
-      # Incase the cluster is upgraded via an out-of-band process (i.e. Portal or AzCLI)
+      # In case the cluster is upgraded via an out-of-band process (i.e. Portal or AzCLI)
       kubernetes_version
     ]
   }
@@ -105,4 +105,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   vnet_subnet_id        = var.subnet_id
   node_taints           = each.value.node_taints
   proximity_placement_group_id = each.value.proximity_placement_group_id
+  ultra_ssd_enabled     = each.value.ultra_ssd_enabled
+  zones                 = each.value.zones
 }

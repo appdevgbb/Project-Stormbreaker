@@ -5,7 +5,7 @@ kind: Job
 metadata:
   name: lm-mpi-job
 spec:
-  minAvailable: 2
+  minAvailable: 1
   schedulerName: volcano
   priorityClassName: high-priority
   plugins:
@@ -19,7 +19,7 @@ spec:
         - event: TaskCompleted
           action: CompleteJob
       template:
-        spec:    
+        spec:
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -45,7 +45,7 @@ spec:
           serviceAccount: sa-mpi-worker-view
           containers:
             - name: mpimaster
-              image: stormbreakeracrdc.azurecr.io/adcird-hpc:55.static.ucx.openmpi-zen3-1 
+              image: stormbreakeracrdc.azurecr.io/hpccm:base-2
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -63,6 +63,8 @@ spec:
               - name: output
                 mountPath: "/mnt/output"
                 readOnly: false
+              - name: scratchpad
+                mountPath: "/mnt/scratchpad"
               ports:
                 - containerPort: 22
                   name: mpijob-port
@@ -78,11 +80,14 @@ spec:
           - name: output
             persistentVolumeClaim:
               claimName: pvc-output
+          - name: scratchpad
+            persistentVolumeClaim:
+              claimName: scratchpad
           restartPolicy: Never
-    - replicas: 2
+    - replicas: 1
       name: mpiworker
       template:
-        spec:  
+        spec:
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -94,7 +99,7 @@ spec:
                     - adcirchpc
           containers:
             - name: mpiworker
-              image: stormbreakeracrdc.azurecr.io/adcird-hpc:55.static.ucx.openmpi-zen3-1 
+              image: stormbreakeracrdc.azurecr.io/hpccm:base-2
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -108,7 +113,9 @@ spec:
               - /bin/sh
               - -c
               - |
-                mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
+               apt update
+               apt install -y openssh-server
+               mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
               volumeMounts:
               - name: input
                 mountPath: "/mnt/input"
@@ -118,6 +125,8 @@ spec:
                 readOnly: false
               - name: shm
                 mountPath: "/dev/shm"
+              - name: scratchpad
+                mountPath: "/mnt/scratchpad"
               ports:
                 - containerPort: 22
                   name: mpijob-port
@@ -135,3 +144,7 @@ spec:
             emptyDir:
               medium: Memory
               sizeLimit: 8Gi
+          - name: scratchpad
+            persistentVolumeClaim: 
+              claimName: scratchpad
+             

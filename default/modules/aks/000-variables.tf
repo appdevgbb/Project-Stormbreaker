@@ -114,7 +114,9 @@ variable "user_node_pools" {
     node_count  = number
     node_labels = map(string)
     node_taints = list(string)
+    zones       = list(string)
     proximity_placement_group_id = string
+    ultra_ssd_enabled = bool
   }))
 
   default = {
@@ -123,7 +125,9 @@ variable "user_node_pools" {
       node_count  = 3
       node_labels = null
       node_taints = []
+      zones       = [3]
       proximity_placement_group_id = null
+      ultra_ssd_enabled = false
     }
   }
 }
