@@ -5,12 +5,12 @@ metadata:
   name: pv-scratchpad
 spec:
   capacity:
-    storage: 10Gi
+    storage: 1000Gi
   accessModes:
     - ReadWriteMany
   nfs:
-    server: 10.255.1.12
-    path: "/emptydir"
+    server: 10.255.1.13
+    path: "/nvme"
   mountOptions:
     - nfsvers=4.1
     - nconnect=16
@@ -32,5 +32,5 @@ spec:
   storageClassName: ""
   resources:
     requests:
-      storage: 10Gi
+      storage: 1000Gi
   volumeName: pv-scratchpad
