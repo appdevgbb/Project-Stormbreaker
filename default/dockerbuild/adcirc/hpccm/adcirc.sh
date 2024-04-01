@@ -17,13 +17,11 @@ apt-get update && apt-get install -y \
     m4 \
     vim \
     unzip \
-    libcurl4-gnutls-dev
-# make a directory to hold source code for adcirc netcdf related dependencies
-# doesn't matter what you call it
-mkdir -p /home/stormbreaker/src
+    libcurl4-gnutls-dev \
+    build-essential \
+    g++
 
-# make a directory to install homemade binaries, libraries, headers, etc.
-# doesn't matter what you call it, but you use it below quite a few times
+mkdir -p /home/stormbreaker/src
 mkdir -p /home/stormbreaker/install
 
 # change the src dir
@@ -36,8 +34,9 @@ wget http://zlib.net/zlib-1.3.1.tar.gz
 # get hdf5
 wget www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.5.tar.gz
 
-# get netcdf
+# get netcdf-c
 wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.9.2.tar.gz
+# get netcdf-fortran
 wget https://downloads.unidata.ucar.edu/netcdf-fortran/4.6.1/netcdf-fortran-4.6.1.tar.gz
 
 ####################
@@ -53,7 +52,7 @@ cd ../
 # install hdf5
 tar -xzvf hdf5-1.10.5.tar.gz
 cd hdf5-1.10.5
-./configure -with-zlib=/home/stormbreaker/install -prefix=/home/stormbreaker/install -enable-fortran  # don't think you have to enable-fortran, but it doesn't hurt
+./configure -with-zlib=/home/stormbreaker/install -prefix=/home/stormbreaker/install -enable-fortran
 make
 make check
 make install
@@ -65,8 +64,22 @@ tar -xzvf v4.9.2.tar.gz
 cd netcdf-c-4.9.2
 export CPPFLAGS=-I/home/stormbreaker/install/include
 export LDFLAGS=-L/home/stormbreaker/install/lib
-./configure -prefix=/home/stormbreaker/install --disable-dap # dap depends on libcurl
+./configure -prefix=/home/stormbreaker/install --disable-dap
 
+make
+make check
+make install
+cd ../
+
+#########################
+# install netcdf fortran library
+
+tar -xzvf netcdf-fortran-4.6.1.tar.gz 
+cd netcdf-fortran-4.6.1
+export CPPFLAGS =-I/home/stormbreaker/install/include
+export LDFLAGS = '-L/home/stormbreaker/install/lib  -lnetcdf'
+export LD_LIBRARY_PATH=/home/stormbreaker/install/lib  
+./configure --prefix=/home/stormbreaker/install  
 make
 make check
 make install
@@ -91,10 +104,10 @@ wget https://github.com/adcirc/adcirc/releases/download/v55.02/adcirc_v55.02.tar
 tar xvzf adcirc_v55.02.tar.gz
 cd adcirc_v55.02/work
 
-NETCDF=enable
-NETCDF4=enable
-NETCDF4_COMPRESSION=enable
-NETCDFHOME=/home/stormbreaker/install
+export NETCDF=enable
+export NETCDF4=enable
+export NETCDF4_COMPRESSION=enable
+export NETCDFHOME=/home/stormbreaker/install
 
 make clobber
 make adcirc
@@ -104,6 +117,7 @@ make clobber
 make config
 
 sed -i -E 's!(../work/odir4)!../\1!g' macros.inc
+# need to run unminimize ? 
 make punswan 
 make clobber 
 cd ../../work

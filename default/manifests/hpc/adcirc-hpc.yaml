@@ -5,7 +5,7 @@ kind: Job
 metadata:
   name: lm-mpi-job
 spec:
-  minAvailable: 1
+  minAvailable: 3
   schedulerName: volcano
   priorityClassName: high-priority
   plugins:
@@ -45,7 +45,10 @@ spec:
           serviceAccount: sa-mpi-worker-view
           containers:
             - name: mpimaster
-              image: stormbreakeracrdc.azurecr.io/hpccm:base-2
+              image: stormbreakeracrdc.azurecr.io/adcirc-hpc:55.02-rc-2
+              env: 
+              - name: LD_LIBRARY_PATH
+                value: /home/stormbreaker/install/lib
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -84,7 +87,7 @@ spec:
             persistentVolumeClaim:
               claimName: scratchpad
           restartPolicy: Never
-    - replicas: 1
+    - replicas: 3
       name: mpiworker
       template:
         spec:
@@ -99,7 +102,10 @@ spec:
                     - adcirchpc
           containers:
             - name: mpiworker
-              image: stormbreakeracrdc.azurecr.io/hpccm:base-2
+              image: stormbreakeracrdc.azurecr.io/adcirc-hpc:55.02-rc-2
+              env: 
+              - name: LD_LIBRARY_PATH
+                value: /home/stormbreaker/install/lib
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -113,9 +119,7 @@ spec:
               - /bin/sh
               - -c
               - |
-               apt update
-               apt install -y openssh-server
-               mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
+                mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
               volumeMounts:
               - name: input
                 mountPath: "/mnt/input"
@@ -123,8 +127,6 @@ spec:
               - name: output
                 mountPath: "/mnt/output"
                 readOnly: false
-              - name: shm
-                mountPath: "/dev/shm"
               - name: scratchpad
                 mountPath: "/mnt/scratchpad"
               ports:
@@ -140,10 +142,6 @@ spec:
           - name: output
             persistentVolumeClaim:
               claimName: pvc-output
-          - name: shm
-            emptyDir:
-              medium: Memory
-              sizeLimit: 8Gi
           - name: scratchpad
             persistentVolumeClaim: 
               claimName: scratchpad

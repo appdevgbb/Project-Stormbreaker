@@ -1,7 +1,7 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: podman
+  name: podman-in-a-pod
 spec:
   affinity:
     nodeAffinity:
@@ -13,7 +13,7 @@ spec:
             values:
             - adcirchpc
   containers:
-    - image:  stormbreakeracrdc.azurecr.io/hpccm:base-3
+    - image:  stormbreakeracrdc.azurecr.io/adcirc-hpc:55.02.openmpi-ucx-rc-1
       name: podman-in-a-pod
       securityContext:
         privileged: true
