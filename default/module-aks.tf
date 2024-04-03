@@ -95,6 +95,8 @@ module "aks" {
       node_labels                  = null
       node_taints                  = ["layer=hec-ras:NoSchedule"]
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
+      zones                        = [3]
+      ultra_ssd_enabled            = false
     }
 
     "hecraswin" = {
@@ -104,15 +106,18 @@ module "aks" {
       node_taints                  = ["layer=hec-ras-win:NoSchedule"]
       os_type			                 = "Windows"
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
+      zones                        = [3]
+      ultra_ssd_enabled            = false
     }
 
-
     "adcirchpc" = {
-      vm_size                      = "Standard_HB120rs_v3"
-      node_count                   = 2
+      vm_size                      = "Standard_HB120-96rs_v3"
+      node_count                   = 0
       node_labels                  = null
       node_taints                  = null
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
+      zones                        = [3]
+      ultra_ssd_enabled            = false
     }
   }
 }

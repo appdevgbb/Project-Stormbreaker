@@ -5,7 +5,7 @@ kind: Job
 metadata:
   name: lm-mpi-job
 spec:
-  minAvailable: 2
+  minAvailable: 3
   schedulerName: volcano
   priorityClassName: high-priority
   plugins:
@@ -19,7 +19,9 @@ spec:
         - event: TaskCompleted
           action: CompleteJob
       template:
-        spec:    
+        spec:
+          # hostNetwork: true
+          # dnsPolicy: ClusterFirstWithHostNet
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -45,7 +47,10 @@ spec:
           serviceAccount: sa-mpi-worker-view
           containers:
             - name: mpimaster
-              image: stormbreakeracrdc.azurecr.io/adcird-hpc:55.static.ucx.openmpi-zen3-1 
+              image: stormbreakeracrdc.azurecr.io/adcirc-hpc:55.02-rc-3.1
+              env: 
+              - name: LD_LIBRARY_PATH
+                value: /home/stormbreaker/install/lib
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -63,10 +68,16 @@ spec:
               - name: output
                 mountPath: "/mnt/output"
                 readOnly: false
+              - name: scratchpad
+                mountPath: "/mnt/scratchpad"
               ports:
-                - containerPort: 22
+                - containerPort: 2222
                   name: mpijob-port
               workingDir: /root
+              lifecycle: # copy all of the files from the scratchpad to Blob
+                preStop:
+                  exec:  
+                    command: ["/bin/sh", "-c", "mkdir /mnt/output/run/$(date +%Y-%m-%d-%H_%M) && cp -r /mnt/scratchpad/TEST_2 /mnt/output/run/"]
           volumes:
           - name: configmap-volume
             configMap:
@@ -78,11 +89,16 @@ spec:
           - name: output
             persistentVolumeClaim:
               claimName: pvc-output
+          - name: scratchpad
+            persistentVolumeClaim:
+              claimName: scratchpad
           restartPolicy: Never
-    - replicas: 2
+    - replicas: 3
       name: mpiworker
       template:
-        spec:  
+        spec:
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -94,7 +110,10 @@ spec:
                     - adcirchpc
           containers:
             - name: mpiworker
-              image: stormbreakeracrdc.azurecr.io/adcird-hpc:55.static.ucx.openmpi-zen3-1 
+              image: stormbreakeracrdc.azurecr.io/adcirc-hpc:55.02-rc-3.1
+              env: 
+              - name: LD_LIBRARY_PATH
+                value: /home/stormbreaker/install/lib
               securityContext:
                 capabilities:
                   add: ["IPC_LOCK"]
@@ -108,7 +127,7 @@ spec:
               - /bin/sh
               - -c
               - |
-                mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
+                apt install -y sysstat; mkdir -p /var/run/sshd; /usr/sbin/sshd -D -p 2222;
               volumeMounts:
               - name: input
                 mountPath: "/mnt/input"
@@ -116,10 +135,10 @@ spec:
               - name: output
                 mountPath: "/mnt/output"
                 readOnly: false
-              - name: shm
-                mountPath: "/dev/shm"
+              - name: scratchpad
+                mountPath: "/mnt/scratchpad"
               ports:
-                - containerPort: 22
+                - containerPort: 2222
                   name: mpijob-port
               workingDir: /root
           restartPolicy: OnFailure
@@ -131,7 +150,7 @@ spec:
           - name: output
             persistentVolumeClaim:
               claimName: pvc-output
-          - name: shm
-            emptyDir:
-              medium: Memory
-              sizeLimit: 8Gi
+          - name: scratchpad
+            persistentVolumeClaim: 
+              claimName: scratchpad
+             

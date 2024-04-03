@@ -54,6 +54,10 @@ spec:
     volumeHandle: stormbreakerstorgbb-output
   mountOptions:
   - nconnect=16
+  - nolock
+  - noatime
+  - rsize=32768,wsize=32768
+  - async
   persistentVolumeReclaimPolicy: Retain
   storageClassName: azureblob-nfs-premium
   volumeMode: Filesystem
