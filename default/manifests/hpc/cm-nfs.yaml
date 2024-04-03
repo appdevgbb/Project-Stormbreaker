@@ -22,19 +22,24 @@ data:
      function start()
      {
          # prepare /etc/exports
+         # create a filesystem on /dev/nvme0n1
+         yum install -y xfsprogs
+         mkfs.xfs /dev/nvme0n1
+         mkdir /exports/nvme
+         mount /dev/nvme0n1 /exports/nvme
+
          fsid=1
          echo "/exports *(rw,fsid=0,insecure,no_root_squash)" >> /etc/exports
          for i in "$@"; do
               # fsid=0: needed for NFSv4
               echo "/exports/$i *(rw,fsid=$fsid,insecure,no_root_squash)" >> /etc/exports
               # make the directories and mount the disks
-              mkdir /exports/"$i"
-              mount_point=$(df | awk -v var="$i" '$0 ~var {print $1}')
-              mount $mount_point /exports/$i
+              # mkdir /exports/"$i"
+              # mount_point=$(df | awk -v var="$i" '$0 ~var {print $1}')
+              # mount $mount_point /exports/$i
               
-              # move index.html to here
-              /bin/cp /tmp/index.html $i/
-              chmod 644 /exports/$i/index.html
+              # create a file to id the filesystem
+              touch /exports/$i/this_is_$i
               echo "Serving /exports/$i"
               fsid=$((fsid+1))
           done

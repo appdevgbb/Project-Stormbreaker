@@ -1,4 +1,11 @@
-FROM ubuntu:20.04 AS build
+# BASE IMAGE FOR ADCIRC: 4
+# Building:
+#   1. Using podman
+#      $ hpccm --recipe mpi_bandwidth.py > Dockerfile
+#      $ sudo podman build --format docker -t base -f Dockerfile .
+# 
+
+FROM ubuntu:22.04 AS build
 
 # GNU compiler
 RUN apt-get update -y && \
@@ -16,7 +23,7 @@ RUN apt-get update -y && \
         wget && \
     rm -rf /var/lib/apt/lists/*
 RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
-    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.6-2.0.9.0/ubuntu20.04/mellanox_mlnx_ofed.list && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.6-2.0.9.0/ubuntu22.04/mellanox_mlnx_ofed.list && \
     apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ibverbs-providers \
@@ -93,7 +100,7 @@ ENV LD_LIBRARY_PATH=/usr/local/openmpi/lib:$LD_LIBRARY_PATH \
 RUN wget -q -nc --no-check-certificate -P /var/tmp https://hpc-tutorials.llnl.gov/mpi/examples/mpi_bandwidth.c && \
     mpicc -o /usr/local/bin/mpi_bandwidth /var/tmp/mpi_bandwidth.c
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # GNU compiler runtime
 RUN apt-get update -y && \
@@ -110,7 +117,7 @@ RUN apt-get update -y && \
         wget && \
     rm -rf /var/lib/apt/lists/*
 RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
-    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.6-2.0.9.0/ubuntu20.04/mellanox_mlnx_ofed.list && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.6-2.0.9.0/ubuntu22.04/mellanox_mlnx_ofed.list && \
     apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ibverbs-providers \

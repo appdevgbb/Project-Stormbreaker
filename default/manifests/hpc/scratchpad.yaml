@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    server: 10.255.1.13
+    server: 10.255.1.10
     path: "/nvme"
   mountOptions:
     - nfsvers=4.1

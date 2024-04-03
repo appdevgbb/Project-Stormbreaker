@@ -9,3 +9,4 @@ default/distfiles/demotools.tar.gz
 default/tfplan
 default/config
 default/.envrc
+default/module-aks.tf

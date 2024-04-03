@@ -23,9 +23,10 @@ spec:
       - /bin/sh
       - -c
       - |
-        apt update ; 
-        apt install -y infiniband-diags vim kmod python3-pip
+        apt update
+        apt install -y vim python3-pip podman
         pip install hpccm
+        sed -i 's/# unqualified-search-registries = \["example.com"\]/unqualified-search-registries = \["docker.io"\]/' /etc/containers/registries.conf
         sleep 360d;
       volumeMounts:
         - name: input
@@ -34,6 +35,8 @@ spec:
         - name: output
           mountPath: "/mnt/output"
           readOnly: false
+        - name: scratchpad
+          mountPath: "/mnt/scratchpad"
   volumes:
     - name: input
       persistentVolumeClaim:
@@ -41,3 +44,6 @@ spec:
     - name: output
       persistentVolumeClaim:
         claimName: pvc-output
+    - name: scratchpad
+      persistentVolumeClaim:
+        claimName: scratchpad

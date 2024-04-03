@@ -101,33 +101,19 @@ export LD_LIBRARY_PATH=/home/stormbreaker/install/lib  # must do this before run
 # alternatively(additionally) you can set(override) these on the command line
 # as described in the ADCIRC development guide. 
 wget https://github.com/adcirc/adcirc/releases/download/v55.02/adcirc_v55.02.tar.gz
-tar xvzf adcirc_v55.02.tar.gz
-cd adcirc_v55.02/work
-
-export NETCDF=enable
-export NETCDF4=enable
-export NETCDF4_COMPRESSION=enable
-export NETCDFHOME=/home/stormbreaker/install
-
-make clobber
-make adcirc
-make padcirc
-cd ../thirdparty/swan
-make clobber
-make config
-
-sed -i -E 's!(../work/odir4)!../\1!g' macros.inc
-# need to run unminimize ? 
-make punswan 
-make clobber 
-cd ../../work
-make adcswan
-make padcswan
-make adcprep SWAN=enable
-make hstime
-make aswip
-
-for i in adcirc adcprep adcswan aswip hstime padcirc padcswan
-do 
-    cp $i /home/stormbreaker/install/bin/
-done 
+mkdir -p adcirc_v55.02/build\
+cd adcirc_v55.02/build\
+cmake .. \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_ADCIRC=ON    \
+    -DBUILD_PADCIRC=ON   \
+    -DBUILD_ADCSWAN=ON   \
+    -DBUILD_PADCSWAN=ON  \
+    -DBUILD_ADCPREP=ON   \
+    -DBUILD_UTILITIES=ON \
+    -DBUILD_ASWIP=ON     \
+    -DBUILD_SWAN=ON      \
+    -DBUILD_PUNSWAN=ON   \
+    -DENABLE_OUTPUT_NETCDF=ON \
+    -DNETCDFHOME=/home/stormbreaker/install
+make install
