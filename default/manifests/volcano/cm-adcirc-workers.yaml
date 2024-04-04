@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cm-adcirc-worker
-data:
-  entrypoint.sh: |-
-    #!/usr/bin/bash
-    mkdir -p /var/run/sshd; /usr/sbin/sshd -D

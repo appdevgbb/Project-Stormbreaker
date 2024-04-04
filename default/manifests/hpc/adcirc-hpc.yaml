@@ -56,12 +56,26 @@ spec:
                   add: ["IPC_LOCK"]
                 privileged: true
               command:
-              - /bin/entrypoint.sh
+              - /bin/sh
+              - -c
+              - |
+                mkdir -p /var/run/sshd; /usr/sbin/sshd
+                TEST_DIR="/mnt/output/"    
+                LD_LIBRARY_PATH="/home/stormbreaker/install/lib"
+                
+                SLOTS=94 # pe:4 * 16 (16 cores)
+                NP=280   # SLOTS * Number of VMs
+                    
+                cd /mnt/scratchpad
+                rm -rf TEST_2.zip run.sh TEST_2
+                cp $TEST_DIR/{run.sh,TEST_2.zip} /mnt/scratchpad
+                unzip TEST_2.zip
+                cd TEST_2/
+
+                adcprep --np $(($NP-10)) --partmesh > adcprep.txt
+                adcprep --np $(($NP-10)) --prepall  >> adcprep.txt
+                mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS  --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc -W 10  > padcirc.log
               volumeMounts:
-              - name: configmap-volume
-                mountPath: /bin/entrypoint.sh
-                readOnly: true
-                subPath: entrypoint.sh
               - name: input
                 mountPath: "/mnt/input"
                 readOnly: false
@@ -79,10 +93,6 @@ spec:
                   exec:  
                     command: ["/bin/sh", "-c", "mkdir /mnt/output/run/$(date +%Y-%m-%d-%H_%M) && cp -r /mnt/scratchpad/TEST_2 /mnt/output/run/"]
           volumes:
-          - name: configmap-volume
-            configMap:
-              defaultMode: 0700
-              name: cm-adcirc
           - name: input
             persistentVolumeClaim:
               claimName: pvc-input
