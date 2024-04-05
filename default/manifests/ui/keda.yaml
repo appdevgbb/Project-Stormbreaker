@@ -6,7 +6,6 @@ metadata:
 spec:
   podIdentity:
     provider: azure | azure-workload
-    
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledJob
