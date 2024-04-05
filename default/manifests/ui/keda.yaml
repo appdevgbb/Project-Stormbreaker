@@ -1,0 +1,59 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: azure-servicebus-auth
+  namespace: default
+spec:
+  podIdentity:
+    provider: azure | azure-workload
+    
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: servicebus-consumer
+  namespace: default
+spec:
+  jobTargetRef:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 4
+    template:
+      spec:
+        serviceAccount: sa-keda-sb-kubectl
+        containers:
+        - name: servicebus-receiver
+          image: stormbreakeracrdc.azurecr.io/misc/servicebus-receiver:1.2
+          imagePullPolicy: Always
+          command: ["python3", "/usr/src/app/servicebus_receiver.py"]          
+          env:
+          - name: SERVICE_BUS_FQDN
+            value: 'dc-sb-test.servicebus.windows.net'
+          - name: SERVICE_BUS_QUEUE_NAME
+            value: "dcq1"
+          volumeMounts:
+          - name: input
+            mountPath: "/mnt/input"
+            readOnly: false
+          - name: output
+            mountPath: "/mnt/output"
+            readOnly: false
+        restartPolicy: Never
+        volumes:
+        - name: input
+          persistentVolumeClaim:
+            claimName: pvc-input
+        - name: output
+          persistentVolumeClaim:
+              claimName: pvc-output
+  pollingInterval: 10
+  maxReplicaCount: 1
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 2
+  triggers:
+  - type: azure-servicebus  
+    metadata:  
+      queueName: dcq1
+      queueLength: '1'
+    authenticationRef:
+      name: sb-trigger-auth
