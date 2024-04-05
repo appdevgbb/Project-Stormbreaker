@@ -19,7 +19,15 @@ spec:
         env:
           - name: SERVICE_BUS_FQDN
             value: 'dc-sb-test.servicebus.windows.net'
-          - name: SERVICE_BUS_QUEUE_NAME
-            value: "dcq1"
+          - name: SERVICE_BUS_QUEUE_DISPATCH
+            value: "dcq1dispatch"
+          - name: SERVICE_BUS_QUEUE_RUNNING
+            value: "dcq1running"
+          - name: SERVICE_BUS_QUEUE_DELETE
+            value: "dcq1delete"
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
         ports:
         - containerPort: 8501

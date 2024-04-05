@@ -1,25 +1,27 @@
 from azure.identity import DefaultAzureCredential
 from azure.servicebus import ServiceBusClient, ServiceBusReceiveMode
-
 import os
 import json
 import subprocess
+import sender
 
-#connstr = os.environ['SERVICE_BUS_CONNECTION_STR']
-queue_name = os.environ['SERVICE_BUS_QUEUE_NAME']
+# service bus queues
+dispatch_queue = os.environ['SERVICE_BUS_QUEUE_DISPATCH']
+running_queue = os.environ['SERVICE_BUS_QUEUE_RUNNING']
+
 fully_qualified_namespace = os.environ['SERVICE_BUS_FQDN']
 
 credential = DefaultAzureCredential()
 
 print("Service Bus Receiver Started")
 
-#with ServiceBusClient.from_connection_string(connstr) as client:
+# receives messages in the dispatcher queue
 with ServiceBusClient(fully_qualified_namespace, credential) as client:
-    with client.get_queue_receiver(queue_name, receive_mode=ServiceBusReceiveMode.RECEIVE_AND_DELETE, max_wait_time=30) as receiver:
+    with client.get_queue_receiver(dispatch_queue, receive_mode=ServiceBusReceiveMode.RECEIVE_AND_DELETE, max_wait_time=30) as receiver:
         for msg in receiver: 
             print(str(msg))
 						
-						# get the value of task
+			# get the value of task
             data = json.loads(str(msg))
             task_value = data.get('task')
 
@@ -36,17 +38,18 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
                 template = file.read()  
               
             # Substitute the variables in the template  
-            modified_template = template.replace("$JOB_NAME", data["task"])  
-            modified_template = modified_template.replace("$JOB_SLOTS", str(data["slots"]))  
-            modified_template = modified_template.replace("$JOB_NP", str(data["np"]))  
-            modified_template = modified_template.replace("$JOB_CUSTOMER", data["customer"].lower())  
+            modified_template = template.replace("$JOB_NAME", data["task"])
+            modified_template = modified_template.replace("$JOB_SLOTS", str(data["slots"]))
+            modified_template = modified_template.replace("$JOB_NP", str(data["np"]))
+            modified_template = modified_template.replace("$JOB_CUSTOMER", data["customer"].lower())
+            modified_template = modified_template.replace("$JOB_SIMULATION", data["simulation"].lower())
               
             # Create the output filename by appending the task name  
-            output_dir = '/mnt/output/run/' + data["customer"].lower()
+            output_dir = '/mnt/output/run/' + data["customer"].lower() + "/" + data["simulation"] + "/" + data["task"]
             if not os.path.exists(output_dir):
             	os.makedirs(output_dir)
             
-            output_filename = output_dir + "/" + "adcirc-hpc-" + data["task"] + ".yaml"  
+            output_filename = output_dir + "/" + "adcirc-hpc-" + data["customer"].lower() + data["simulation"] + data["task"] + ".yaml"  
               
             # Write the modified template to a file  
             with open(output_filename, "w") as file:  
@@ -54,3 +57,7 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
             
             # Execute the kubectl command  
             subprocess.run(["kubectl", "apply", "-f", output_filename], check=True)
+
+            # updates the running queue
+            json_data = json.dumps(data) 
+            sender.send_message(fully_qualified_namespace, running_queue, json_data)

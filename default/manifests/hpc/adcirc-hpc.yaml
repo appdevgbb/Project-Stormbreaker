@@ -60,17 +60,16 @@ spec:
               - -c
               - |
                 mkdir -p /var/run/sshd; /usr/sbin/sshd
-                TEST_DIR="/mnt/output/"    
+                TEST_DIR="/mnt/output/simulations/adcirc/guam"
                 LD_LIBRARY_PATH="/home/stormbreaker/install/lib"
                 
                 SLOTS=94 # pe:4 * 16 (16 cores)
                 NP=280   # SLOTS * Number of VMs
                     
                 cd /mnt/scratchpad
-                rm -rf TEST_2.zip run.sh TEST_2
-                cp $TEST_DIR/{run.sh,TEST_2.zip} /mnt/scratchpad
-                unzip TEST_2.zip
-                cd TEST_2/
+                rm -rf guam/
+                cp -pR $TEST_DIR/ /mnt/scratchpad
+                cd guam/
 
                 adcprep --np $(($NP-10)) --partmesh > adcprep.txt
                 adcprep --np $(($NP-10)) --prepall  >> adcprep.txt

@@ -1,9 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-adcirc
+data:
+  entrypoint.sh: |-
+    #!/usr/bin/bash -l
+    mkdir -p /var/run/sshd; /usr/sbin/sshd
+    TEST_DIR=/mnt/output/simulations/adcirc/$JOB_SIMULATION
+    LD_LIBRARY_PATH="/home/stormbreaker/install/lib"
+    WORKDIR=/mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME/
+    SLOTS=$JOB_SLOTS # pe:4 * 16 (16 cores)
+    NP=$JOB_NP       # SLOTS * Number of VMs
+      
+    mkdir -p $WORKDIR
+    cd $WORKDIR
+    cp $TEST_DIR/* $WORKDIR
+
+    adcprep --np $(($NP-10)) --partmesh > adcprep.txt
+    adcprep --np $(($NP-10)) --prepall  >> adcprep.txt
+    mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS  --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc -W 10 > padcirc.log
+---
 # ADCIRC compiled with OpenMPI
 # models are accessible on a NFS share
 apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
-  name: job-$JOB_CUSTOMER-$JOB_NAME
+  name: job-$JOB_NAME
 spec:
   minAvailable: 3
   schedulerName: volcano
@@ -20,6 +42,8 @@ spec:
           action: CompleteJob
       template:
         spec:
+          # hostNetwork: true
+          # dnsPolicy: ClusterFirstWithHostNet
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -34,12 +58,12 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  until [[ "$(kubectl get pod -l volcano.sh/job-name=lm-mpi-job,volcano.sh/task-spec=mpiworker -o json | jq '.items | length')" != 0 ]]; do
+                  until [[ "$(kubectl get pod -l volcano.sh/job-name=job-$JOB_NAME,volcano.sh/task-spec=mpiworker -o json | jq '.items | length')" != 0 ]]; do
                     echo "Waiting for MPI worker pods..."
                     sleep 3
                   done
                   echo "Waiting for MPI worker pods to be ready..."
-                  kubectl wait pod -l volcano.sh/job-name=lm-mpi-job,volcano.sh/task-spec=mpiworker --for=condition=Ready --timeout=600s
+                  kubectl wait pod -l volcano.sh/job-name=job-$JOB_NAME,volcano.sh/task-spec=mpiworker --for=condition=Ready --timeout=600s
               image: mcr.microsoft.com/oss/kubernetes/kubectl:v1.26.3
               name: wait-for-workers
           serviceAccount: sa-mpi-worker-view
@@ -53,26 +77,7 @@ spec:
                 capabilities:
                   add: ["IPC_LOCK"]
                 privileged: true
-              command:
-              - /bin/sh
-              - -c
-              - |
-                mkdir -p /var/run/sshd; /usr/sbin/sshd
-                TEST_DIR="/mnt/output/"    
-                LD_LIBRARY_PATH="/home/stormbreaker/install/lib"
-                
-                SLOTS=$JOB_SLOTS # pe:4 * 16 (16 cores)
-                NP=$JOB_NP       # SLOTS * Number of VMs
-                    
-                cd /mnt/scratchpad
-                rm -rf TEST_2.zip run.sh TEST_2
-                cp $TEST_DIR/{run.sh,TEST_2.zip} /mnt/scratchpad
-                unzip TEST_2.zip
-                cd TEST_2/
-
-                adcprep --np $(($NP-10)) --partmesh > adcprep.txt
-                adcprep --np $(($NP-10)) --prepall  >> adcprep.txt
-                mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS  --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc hostname
+              command: ["/bin/entrypoint.sh"]
               volumeMounts:
               - name: input
                 mountPath: "/mnt/input"
@@ -82,6 +87,10 @@ spec:
                 readOnly: false
               - name: scratchpad
                 mountPath: "/mnt/scratchpad"
+              - name: adcirc-config
+                mountPath: /bin/entrypoint.sh
+                readOnly: true
+                subPath: entrypoint.sh
               ports:
                 - containerPort: 2222
                   name: mpijob-port
@@ -89,7 +98,7 @@ spec:
               lifecycle: # copy all of the files from the scratchpad to Blob
                 preStop:
                   exec:  
-                    command: ["/bin/sh", "-c", "mkdir /mnt/output/run/$JOB_CUSTOMER/ && cp -r /mnt/scratchpad/TEST_2 /mnt/output/run/$JOB_CUSTOMER"]
+                    command: ["/bin/sh", "-c", "cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME"]
           volumes:
           - name: input
             persistentVolumeClaim:
@@ -100,6 +109,10 @@ spec:
           - name: scratchpad
             persistentVolumeClaim:
               claimName: scratchpad
+          - name: adcirc-config
+            configMap:
+              defaultMode: 0700
+              name: cm-adcirc    
           restartPolicy: Never
     - replicas: 3
       name: mpiworker
@@ -161,4 +174,3 @@ spec:
           - name: scratchpad
             persistentVolumeClaim: 
               claimName: scratchpad
-             
