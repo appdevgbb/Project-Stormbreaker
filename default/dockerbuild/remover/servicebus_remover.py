@@ -24,4 +24,4 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
             print("Deleting job-" + task_value)
             
             # Execute the kubectl command  
-            subprocess.run(["kubectl", "delete", "vcjob", "job-", task_value], check=True)            
+            subprocess.run(["kubectl", "delete", "vcjob", "job-" + task_value], check=True)            

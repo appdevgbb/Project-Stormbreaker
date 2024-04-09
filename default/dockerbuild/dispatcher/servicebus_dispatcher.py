@@ -1,9 +1,22 @@
 from azure.identity import DefaultAzureCredential
-from azure.servicebus import ServiceBusClient, ServiceBusReceiveMode
+from azure.servicebus import ServiceBusClient, ServiceBusReceiveMode, ServiceBusMessage
 import os
 import json
 import subprocess
-import sender
+
+
+def load_json_file(filename):  
+    with open(filename) as job:  
+        data = json.load(job)  
+    return json.dumps(data)  
+  
+def send_message(fully_qualified_namespace, queue_name, json_data):
+    with ServiceBusClient(fully_qualified_namespace, credential) as client:  
+        with client.get_queue_sender(queue_name) as sender:  
+            single_message = ServiceBusMessage(json_data)  
+            sender.send_messages(single_message)  
+            print("Message sent to", queue_name)
+            print(single_message)  
 
 # service bus queues
 dispatch_queue = os.environ['SERVICE_BUS_QUEUE_DISPATCH']
@@ -60,4 +73,4 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
 
             # updates the running queue
             json_data = json.dumps(data) 
-            sender.send_message(fully_qualified_namespace, running_queue, json_data)
+            send_message(fully_qualified_namespace, running_queue, json_data)

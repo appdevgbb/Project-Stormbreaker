@@ -13,5 +13,7 @@ def receive_messages(fully_qualified_namespace, running_queue):
     # receives messages in the dispatcher queue
     with ServiceBusClient(fully_qualified_namespace, credential) as client:
         with client.get_queue_receiver(running_queue, receive_mode=ServiceBusReceiveMode.PEEK_LOCK, max_wait_time=3) as receiver:
-            for msg in receiver: 
-                return msg
+            messages = []
+            for msg in receiver:
+                messages.append(str(msg))
+            return messages
