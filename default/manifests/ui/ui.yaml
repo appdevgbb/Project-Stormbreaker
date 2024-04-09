@@ -27,7 +27,7 @@ spec:
             value: "dcq1delete"
         resources:
           limits:
-            cpu: 1
+            cpu: 2
             memory: 1Gi
         ports:
         - containerPort: 8501

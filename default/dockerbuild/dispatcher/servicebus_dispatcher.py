@@ -21,13 +21,11 @@ def send_message(fully_qualified_namespace, queue_name, json_data):
 # service bus queues
 dispatch_queue = os.environ['SERVICE_BUS_QUEUE_DISPATCH']
 running_queue = os.environ['SERVICE_BUS_QUEUE_RUNNING']
-
 fully_qualified_namespace = os.environ['SERVICE_BUS_FQDN']
 
 credential = DefaultAzureCredential()
 
 print("Service Bus Receiver Started")
-
 # receives messages in the dispatcher queue
 with ServiceBusClient(fully_qualified_namespace, credential) as client:
     with client.get_queue_receiver(dispatch_queue, receive_mode=ServiceBusReceiveMode.RECEIVE_AND_DELETE, max_wait_time=30) as receiver:

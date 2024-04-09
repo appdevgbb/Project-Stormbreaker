@@ -3,17 +3,14 @@ from azure.servicebus import ServiceBusClient, ServiceBusReceiveMode
 import os
 import json
 import subprocess
-import sender
 
 # service bus queues
+running_queue = os.environ['SERVICE_BUS_QUEUE_RUNNING']
 delete_queue = os.environ['SERVICE_BUS_QUEUE_DELETE']
-
 fully_qualified_namespace = os.environ['SERVICE_BUS_FQDN']
-
 credential = DefaultAzureCredential()
 
 print("Service Bus Remover Started")
-
 # receives messages in the delete queue
 with ServiceBusClient(fully_qualified_namespace, credential) as client:
     with client.get_queue_receiver(delete_queue, receive_mode=ServiceBusReceiveMode.RECEIVE_AND_DELETE, max_wait_time=30) as receiver:
@@ -24,4 +21,7 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
             print("Deleting job-" + task_value)
             
             # Execute the kubectl command  
-            subprocess.run(["kubectl", "delete", "vcjob", "job-" + task_value], check=True)            
+            subprocess.run(["kubectl", "delete", "vcjob", "job-" + task_value], check=True)
+
+            # remove job from the running queue
+            client.get_queue_receiver(running_queue, receive_mode=ServiceBusReceiveMode.RECEIVE_AND_DELETE, max_wait_time=30)   
