@@ -125,7 +125,8 @@ def main():
     delete_button = st.button('Delete')  
     
     # Action when delete button is clicked  
-    if delete_button:  
+    if delete_button:
+        task = task.replace('"', '')
         # Send the message
         delete_task = {
             "task": task
