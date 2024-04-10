@@ -72,6 +72,7 @@ module "aks" {
     admin_username          = var.admin_username
     ssh_key                 = "~/.ssh/id_rsa.pub"
     blob_driver_enabled     = true
+    keda_enabled            = true
   }
 
   default_node_pool = {
@@ -112,7 +113,7 @@ module "aks" {
 
     "adcirchpc" = {
       vm_size                      = "Standard_HB120-96rs_v3"
-      node_count                   = 0
+      node_count                   = 3
       node_labels                  = null
       node_taints                  = null
       proximity_placement_group_id = azurerm_proximity_placement_group.dev.id

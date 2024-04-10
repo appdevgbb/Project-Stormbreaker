@@ -62,6 +62,7 @@ variable "aks_settings" {
     admin_username          = string
     ssh_key                 = string
     blob_driver_enabled     = bool
+    keda_enabled            = bool
   
   })
   default = {
@@ -78,7 +79,7 @@ variable "aks_settings" {
     admin_username          = "azureuser"
     ssh_key                 = null
     blob_driver_enabled     = false
-
+    keda_enabled            = false
   }
 }
 
