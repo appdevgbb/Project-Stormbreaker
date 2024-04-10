@@ -56,7 +56,7 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
             modified_template = modified_template.replace("$JOB_SIMULATION", data["simulation"].lower())
               
             # Create the output filename by appending the task name  
-            output_dir = '/mnt/output/run/' + data["customer"].lower() + "/" + data["simulation"] + "/" + data["task"]
+            output_dir = '/mnt/output/run/' + data["customer"].lower() + "/" + data["simulation"].lower() + "/" + data["task"]
             if not os.path.exists(output_dir):
             	os.makedirs(output_dir)
             

@@ -108,7 +108,7 @@ spec:
               lifecycle: # copy all of the files from the scratchpad to Blob
                 preStop:
                   exec:  
-                    command: ["/bin/sh", "-c", "cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME"]
+                    command: ["/bin/sh", "-c", "cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME"]
           volumes:
           - name: input
             persistentVolumeClaim:
