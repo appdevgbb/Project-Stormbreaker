@@ -26,14 +26,3 @@ helm upgrade -i --wait \
 # Note: use --set ofedDriver.version="<MOFED VERSION>"
 #       to install a specific MOFED version
 #
-
-
-
-
-
-
-
-
-
-#mpiexec --allow-run-as-root -np 16 -npernode 16 --bind-to numa --map-by ppr:16:node -hostfile /etc/volcano/mpiworker.host -x UCX_TLS=tcp -x UCX_NET_DEVICES=eth0 -x CUDA_DEVICE_ORDER=PCI_BUS_ID -x NCCL_SOCKET_IFNAME=eth0 -mca coll_hcoll_enable 0 padcirc
-
