@@ -19,7 +19,9 @@ data:
     adcprep --np $(($NP-10)) --partmesh > adcprep.txt
     adcprep --np $(($NP-10)) --prepall  >> adcprep.txt
     mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc -W 10 > padcirc.log
-    
+ 
+    cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/
+
     # MPI job exit status
     exit $?
 ---
