@@ -3,7 +3,8 @@ import json
 import uuid    
 import os  
 import json
-import pandas as pd  
+import pandas as pd
+import time 
 from azure.servicebus import ServiceBusClient, ServiceBusMessage, ServiceBusReceiveMode
 from azure.identity import DefaultAzureCredential
   
@@ -25,6 +26,7 @@ def receive_messages(fully_qualified_namespace, running_queue):
                 messages.append(str(msg))
             return messages
 
+@st.cache_data
 def refresh_data():
     running_tasks = receive_messages(fully_qualified_namespace, running_queue)  
         
@@ -36,7 +38,6 @@ def refresh_data():
     df = pd.DataFrame(data)  
     test = st.data_editor(df, hide_index=True)  
     
-
 def send_to_delete_queue(selected_rows):  
     json_data = selected_rows.to_json(orient='records')  
     print('Deleting ', json_data)  
@@ -98,19 +99,24 @@ def main():
                 deploy_data = load_json_file(filename)  
                 send_message(fully_qualified_namespace, dispatch_queue, json_data)  
                 st.success('Simulation started')    
-                st.write('Here is your simulation details:')    
-                st.json(json_data)    
+                st.write('Here is your simulation details:')
+                st.json(json_data)
         else:  
             st.error("Input is not valid. Please do not enter any special characters or spaces.")  
     else:    
         st.warning('Please fill in all fields.')
 
-
+ 
     # refresh button
-    st.write("Current tasks") 
+    st.write("Current tasks")
+    refresh_data()
+    
     refresh_button = st.button('Refresh')
     if refresh_button:
-        refresh_data()
+        refresh_data.clear()
+        message = st.success('Cache is cleared!')
+        time.sleep(5)
+        message.empty()
 
     # User inputs the value from the table into a text_input  
     task = st.text_input('Enter the task to delete')  

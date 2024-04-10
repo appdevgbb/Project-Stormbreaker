@@ -60,7 +60,7 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
             if not os.path.exists(output_dir):
             	os.makedirs(output_dir)
             
-            output_filename = output_dir + "/" + "adcirc-hpc-" + data["customer"].lower() + data["simulation"] + data["task"] + ".yaml"  
+            output_filename = output_dir + "/" + "adcirc-hpc-" + data["customer"].lower() + data["simulation"].lower() + data["task"] + ".yaml"  
               
             # Write the modified template to a file  
             with open(output_filename, "w") as file:  

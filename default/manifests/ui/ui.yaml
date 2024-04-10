@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment  
 metadata:  
   name: stormbreaker-ui  
-spec:  
+spec:
   replicas: 1  
   selector:  
     matchLabels:  
@@ -11,7 +11,16 @@ spec:
     metadata:  
       labels:  
         app: stormbreaker-ui
-    spec:  
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: agentpool
+                operator: In
+                values:
+                - system  
       containers:  
       - name: stormbreaker-ui
         image: stormbreakeracrdc.azurecr.io/misc/ui:1.3

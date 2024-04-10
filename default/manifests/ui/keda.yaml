@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   podIdentity:
-    provider: azure | azure-workload
+    provider: azure
 ---
 # dispatch
 apiVersion: keda.sh/v1alpha1
@@ -20,6 +20,15 @@ spec:
     backoffLimit: 4
     template:
       spec:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: agentpool
+                  operator: In
+                  values:
+                  - system
         serviceAccount: sa-keda-sb-kubectl
         containers:
         - name: servicebus-dispatcher
@@ -55,10 +64,11 @@ spec:
   triggers:
   - type: azure-servicebus  
     metadata:  
-      queueName: dcq1dispatch
+      queueName: dcq1dispatch  # service bus queue
       queueLength: '1'
+      namespace: dc-sb-test  # service bus namespace
     authenticationRef:
-      name: sb-trigger-auth
+      name: azure-servicebus-auth
 ---
 # delete
 apiVersion: keda.sh/v1alpha1
@@ -73,6 +83,15 @@ spec:
     backoffLimit: 4
     template:
       spec:
+        affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: agentpool
+                    operator: In
+                    values:
+                    - system
         serviceAccount: sa-keda-sb-kubectl
         containers:
         - name: servicebus-remover
@@ -84,6 +103,8 @@ spec:
             value: 'dc-sb-test.servicebus.windows.net'
           - name: SERVICE_BUS_QUEUE_DELETE
             value: "dcq1delete"
+          - name: SERVICE_BUS_QUEUE_RUNNING
+            value: "dcq1running"
           volumeMounts:
           - name: input
             mountPath: "/mnt/input"
@@ -106,7 +127,8 @@ spec:
   triggers:
   - type: azure-servicebus  
     metadata:  
-      queueName: dcq1delete
+      queueName: dcq1delete # service bus queue
       queueLength: '1'
+      namespace: dc-sb-test # service bus namespace
     authenticationRef:
-      name: sb-trigger-auth
+      name: azure-servicebus-auth

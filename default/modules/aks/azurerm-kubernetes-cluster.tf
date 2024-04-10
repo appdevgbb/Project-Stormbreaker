@@ -67,11 +67,14 @@ resource "azurerm_kubernetes_cluster" "dev" {
     blob_driver_enabled = var.aks_settings.blob_driver_enabled
   }
 
+  workload_autoscaler_profile {
+    keda_enabled        = var.aks_settings.keda_enabled
+  }
+  
   oms_agent {
     log_analytics_workspace_id = var.log_analytics_workspace
     msi_auth_for_monitoring_enabled = true
   }
-
 
   # For certain services/features; requires more API request limits to CP/ARM
   sku_tier = "Standard"
