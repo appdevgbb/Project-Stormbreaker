@@ -29,5 +29,4 @@ with ServiceBusClient(fully_qualified_namespace, credential) as client:
                     running_data = json.loads(str(running_msg))  
                     running_task_value = running_data.get('task')  
                     if running_task_value == task_value:  
-                        running_receiver.complete_message(running_msg)  
                         break  

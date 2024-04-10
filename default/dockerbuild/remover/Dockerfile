@@ -1,3 +1,4 @@
+# az acr build  -t misc/servicebus-dispatcher:1.0 -r stormbreakeracrdc.azurecr.io .
 # Use an official Python runtime as a parent image
 FROM python:3.8
 
