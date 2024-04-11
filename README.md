@@ -40,6 +40,10 @@ For example, during [Hurricane Gustav](https://en.wikipedia.org/wiki/Hurricane_G
  - [x] [Azure CNI Overlay mode](https://learn.microsoft.com/en-us/azure/aks/configure-azure-cni)
  - [x] [Azure Monitor managed service for Prometheus](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/prometheus-metrics-overview)
  - [x] [Azure Managed Grafana](https://learn.microsoft.com/en-us/azure/managed-grafana/overview)
+ - [x] [Container insights](https://learn.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-analyze) 
+ - [x] [Azure Service Bus](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview)
+ - [x] [Volcano - A Cloud Native Batch System (Project under CNCF)](https://volcano.sh/en/)
+ - [x] [KEDA - A Kubernetes-based Event Driven Autoscaler](https://keda.sh/)
 
 ### Before You Begin
 You might need to run az login before running the commands on this demo. Check if you have connectivity to Azure before proceeding by executing az account list and verifying that you have access to an active Azure subscription.
