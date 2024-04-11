@@ -29,9 +29,10 @@ ADCIRC can be run in parallel to speed up computation time, which is especially 
 
 For example, during [Hurricane Gustav](https://en.wikipedia.org/wiki/Hurricane_Gustav), ADCIRC was used in parallel to quickly provide accurate storm surge forecasts. These forecasts played a crucial role in informing evacuation plans and emergency responses, potentially saving lives and property.
 
-## Components of this solution
-
 ![](assets/diagram.png)
+
+## Components of this solution
+![](assets/architecture.png)
 
  - [x] [Azure Kubernetes Services](https://learn.microsoft.com/en-us/azure/aks/)
  - [x] [Azure Data Lake Storage Gen2 with HNM and NFSv3](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-feature-support-in-storage-accounts)
