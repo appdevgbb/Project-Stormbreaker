@@ -18,6 +18,7 @@ load_env() {
   export RESOURCE_GROUP_NAME=$(echo $TF_OUTPUTS | jq -r .resource_group_name.value)
   export STORAGE_ACCOUNT=$(echo $TF_OUTPUTS | jq -r .storage_account_name.value)
   export CONTAINER_NAME=$(echo $TF_OUTPUTS | jq -r .container_name.value)
+  export SERVICEBUS_NAME=$(echo $TF_OUTPUTS | jq -r .servicebus_name.value)
   echo "***************************************************"
   echo "AZ_MONITOR_WORKSPACE_ID: " $AZ_MONITOR_WORKSPACE_ID
   echo "AKS_CLUSTER_NAME: " $AKS_CLUSTER_NAME
@@ -25,6 +26,7 @@ load_env() {
   echo "RESOURCE_GROUP_NAME: " $RESOURCE_GROUP_NAME
   echo "STORAGE_ACCOUNT: " $STORAGE_ACCOUNT
   echo "CONTAINER_NAME: " $CONTAINER_NAME
+  echo "SERVICEBUS_NAME: " $SERVICEBUS_NAME
   echo "***************************************************"
 }
 
@@ -62,16 +64,21 @@ create_nfs_workload() {
   sed "
     s/RESOURCE_GROUP_NAME/$RESOURCE_GROUP_NAME/g;
     s/STORAGE_ACCOUNT/$STORAGE_ACCOUNT/g;
-    s/CONTAINER_NAME/$CONTAINER_NAME/g" manifests/pv-blob-nfs.tpl >output/pv-blob-nfs.yaml
+    s/CONTAINER_NAME/$CONTAINER_NAME/g" manifests/pv-blob-nfs.tpl > output/pv-blob-nfs.yaml
 
-    cp manifests/{nginx-pod-blob.yaml,pvc-blob-nfs.yaml} output/
+  cp manifests/{nginx-pod-blob.yaml,pvc-blob-nfs.yaml} output/
 }
 
-do_generate_kubeconfig(){
-  terraform output -raw kubeconfig > config
+create_keda_template() {
+  echo "Creating KEDA files"
+  sed "s/SERVICEBUS_NAME/$SERVICEBUS_NAME/g;" manifests/keda.tpl > output/keda.yaml
+}
+
+do_generate_kubeconfig() {
+  terraform output -raw kubeconfig >config
 }
 # a test workload
-do_deploy_nfs_workload(){
+do_deploy_nfs_workload() {
   KUBECONFIG=config kubectl apply -f output/
 }
 
@@ -89,6 +96,7 @@ enable_prometheus_integration() {
 do_demo_bootstrap() {
   load_env
   create_nfs_workload
+  create_keda_template
   # enable_prometheus_integration
   do_generate_kubeconfig
   do_deploy_nfs_workload

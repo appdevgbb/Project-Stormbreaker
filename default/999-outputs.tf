@@ -53,3 +53,7 @@ output "container_name" {
 output "azure_monitor_workspace_id" {
   value = azapi_resource.azure_monitor_workspace.id
 }
+
+output "servicebus_name" {
+  value = azurerm_servicebus_namespace.stormbreaker-servicebus.name
+}

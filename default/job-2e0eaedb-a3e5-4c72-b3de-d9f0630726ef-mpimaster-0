@@ -1,3 +1,6 @@
+# Simulation: Guam
+# NP: 280
+# SLOTS: 94
 apiVersion: v1
 kind: Pod
 metadata:
