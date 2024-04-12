@@ -28,13 +28,13 @@ resource "azurerm_servicebus_queue" "delete" {
   enable_partitioning = true
 }
 
-data "azurerm_user_assigned_identity" "managed-id" {
-  name                = "aks-user-assigned-managed-id"
-  resource_group_name = azurerm_resource_group.default.name
-}
+# data "azurerm_user_assigned_identity" "managed-id" {
+#   name                = "aks-user-assigned-managed-id"
+#   resource_group_name = azurerm_resource_group.default.name
+# }
 
 resource "azurerm_role_assignment" "stormbreaker-servicebus" {
   scope                = azurerm_servicebus_namespace.stormbreaker-servicebus.id
   role_definition_name = "Azure Service Bus Data Owner"
-  principal_id         = data.azurerm_user_assigned_identity.managed-id.principal_id
+  principal_id         = azurerm_user_assigned_identity.managed-id.principal_id
 }

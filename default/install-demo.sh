@@ -19,6 +19,9 @@ load_env() {
   export STORAGE_ACCOUNT=$(echo $TF_OUTPUTS | jq -r .storage_account_name.value)
   export CONTAINER_NAME=$(echo $TF_OUTPUTS | jq -r .container_name.value)
   export SERVICEBUS_NAME=$(echo $TF_OUTPUTS | jq -r .servicebus_name.value)
+  export USER_ASSIGNED_CLIENT_ID=$(echo $TF_OUTPUTS|jq -r .aks_managed_id.value.client_id)
+  export SUBSCRIPTION_ID=$(echo $TF_OUTPUTS | jq -r .azure_subscription.value.subscription_id)
+  export TENANT_ID=$(echo $TF_OUTPUTS | jq -r .azure_subscription.value.tenant_id)
   echo "***************************************************"
   echo "AZ_MONITOR_WORKSPACE_ID: " $AZ_MONITOR_WORKSPACE_ID
   echo "AKS_CLUSTER_NAME: " $AKS_CLUSTER_NAME
@@ -27,6 +30,9 @@ load_env() {
   echo "STORAGE_ACCOUNT: " $STORAGE_ACCOUNT
   echo "CONTAINER_NAME: " $CONTAINER_NAME
   echo "SERVICEBUS_NAME: " $SERVICEBUS_NAME
+  echo "USER_ASSIGNED_CLIENT_ID: " $USER_ASSIGNED_CLIENT_ID
+  echo "SUBSCRIPTION_ID: " $SUBSCRIPTION_ID
+  echo "TENANT_ID: " $TENANT_ID
   echo "***************************************************"
 }
 
@@ -59,6 +65,39 @@ demo_providers() {
   az provider register --namespace ${_AZURE_NAMESPACE}
 }
 
+# based on https://azureglobalblackbelts.com/2023/12/18/external-dns-workload-identity.html
+create_external_dns(){
+  cat <<EOF > output/values.yaml
+fullnameOverride: external-dns
+
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: ${USER_ASSIGNED_CLIENT_ID}
+
+podLabels:
+  azure.workload.identity/use: "true"
+
+provider: azure-private-dns
+
+azure:
+  resourceGroup: "${RESOURCE_GROUP_NAME}"
+  tenantId: "${TENANT_ID}"
+  subscriptionId: "${SUBSCRIPTION_ID}"
+  useWorkloadIdentityExtension: true
+
+logLevel: debug
+EOF
+
+  # Add the helm repo
+  helm repo add bitnami https://charts.bitnami.com/bitnami
+
+  # Update the helm repo in case you already have it
+  helm repo update bitnami
+
+  # Install external dns
+  helm install external-dns bitnami/external-dns -f output/values.yaml
+
+}
 create_nfs_workload() {
   echo "Creating a sample file"
   sed "
