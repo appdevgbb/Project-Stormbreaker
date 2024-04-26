@@ -1,7 +1,3 @@
-# This script installs the Refinitiv Tick Capture (RTC) application on an Azure Kubernetes Service (AKS) cluster.
-# It sets environment variables, loads dynamic values from Terraform, and creates a workload identity service account and federated credential.
-# The script also checks for and registers the necessary Azure providers for the demo.
-
 #!/usr/bin/env bash
 # shfmt -i 2 -ci -w
 set -euo pipefail
@@ -126,9 +122,18 @@ enable_prometheus_integration() {
   az aks update \
     --enable-azure-monitor-metrics \
     --name ${AKS_CLUSTER_NAME} \
-    --resource-group ${RGNAME} \
+    --resource-group ${RESOURCE_GROUP_NAME} \
     --azure-monitor-workspace-resource-id ${AZ_MONITOR_WORKSPACE_ID} \
     --grafana-resource-id ${GRAFANA_RESOURCE_ID}
+}
+
+# enable cost analysis
+# this should be migrated to Terraform once supported.
+do_enable_cost_analysis() {
+  az aks update \
+    --resource-group ${RESOURCE_GROUP_NAME} \
+    --name ${AKS_CLUSTER_NAME} \
+    --enable-cost-analysis
 }
 
 # we start here
@@ -139,4 +144,5 @@ do_demo_bootstrap() {
   # enable_prometheus_integration
   do_generate_kubeconfig
   do_deploy_nfs_workload
+  do_enable_cost_analysis
 }
