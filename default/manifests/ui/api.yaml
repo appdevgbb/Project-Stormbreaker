@@ -7,8 +7,8 @@ spec:
     app: stormbreaker-api
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
+      port: 8001
+      targetPort: 8001
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -23,7 +23,11 @@ spec:
     metadata:
       labels:
         app: stormbreaker-api
+        azure.workload.identity/use: "true"
+      annotations:
+        azure.workload.identity/inject-proxy-sidecar: "true"
     spec:
+      serviceAccount: workload-identity-sa
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -33,18 +37,18 @@ spec:
                     operator: In
                     values:
                       - system
-      serviceAccount: sa-keda-sb-kubectl
       containers:
         - name: backend
           image: stormbreakeracrdc.azurecr.io/misc/backend:1.3
           imagePullPolicy: Always
           ports:
-            - containerPort: 8000
+            - containerPort: 8001
           envFrom:
             - configMapRef:
                 name: env-config
             - secretRef:
                 name: django-secret
+          command: ["python", "manage.py", "runserver", "0.0.0.0:8001"]
           resources:
             limits:
               cpu: "1"

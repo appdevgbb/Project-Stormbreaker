@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   name: env-config
 data:
-  SERVICE_BUS_FQDN: "dc-sb-test.servicebus.windows.net"
-  SERVICE_BUS_QUEUE_DISPATCH: "stormbreaker-patch"
+  SERVICE_BUS_FQDN: "stormbreaker-servicebusgbb.servicebus.windows.net"
+  SERVICE_BUS_QUEUE_DISPATCH: "stormbreaker-dispatch"
   SERVICE_BUS_QUEUE_RUNNING: "stormbreaker-running"
   SERVICE_BUS_QUEUE_DELETE: "stormbreaker-delete"
-  REACT_APP_STORMBREAKER_API_HOST: "10.174.146.250"
-  REACT_APP_STORMBREAKER_API_PORT: "8000"
+  REACT_APP_STORMBREAKER_API_HOST: "stormbreaker-api-service"
+  REACT_APP_STORMBREAKER_API_PORT: "8001"
