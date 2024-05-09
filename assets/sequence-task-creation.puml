@@ -1,0 +1,28 @@
+@startuml
+title Task Creation
+
+actor User
+participant "UI" as UI
+participant "Service Bus Queue:\nDispatch" as SB_Dispatch
+participant "KEDA:\nservicebus-dispatcher" as KEDA_Dispatcher
+
+participant "Service Bus Queue:\nRunning" as SB_Running
+
+participant "Kubernetes API" as K8S_API
+
+autonumber
+hide footbox
+
+User -> UI: creates task
+UI -> SB_Dispatch: sends task to queue
+KEDA_Dispatcher -> SB_Dispatch: removes task from queue
+
+KEDA_Dispatcher -> K8S_API: creates volcano job
+KEDA_Dispatcher -> SB_Running: adds task to running queue
+
+loop
+UI -> SB_Running: reads tasks
+UI -> User: shows running tasks
+end
+@enduml
+

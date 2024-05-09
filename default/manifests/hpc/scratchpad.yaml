@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    server: 10.255.1.10
+    server: nfs-server.privatelink.azurecr.io
     path: "/nvme"
   mountOptions:
     - nfsvers=4.1
