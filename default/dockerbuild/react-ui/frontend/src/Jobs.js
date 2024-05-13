@@ -15,7 +15,7 @@ export default function Jobs() {
   console.log(crud_url);
 
   const [validationErrors, setValidationErrors] = React.useState({});
-  const options_available = ["Guam", "Katrina", "Gustav"];
+  const options_available = ["Guam", "Gustav", "Katrina"];
 
   /* Column Headers */
   const columns = React.useMemo(

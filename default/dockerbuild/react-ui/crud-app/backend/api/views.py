@@ -1,13 +1,12 @@
-from .models import Job  
-from .serializers import JobSerializer  
-from azure.servicebus import ServiceBusClient, ServiceBusMessage, ServiceBusReceiveMode  
+from .models import Job
+from .serializers import JobSerializer
+from azure.servicebus import ServiceBusClient, ServiceBusMessage, ServiceBusReceiveMode
 from azure.identity import DefaultAzureCredential
-from django.http import JsonResponse  
-from django.shortcuts import render  
+from django.http import JsonResponse
+from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-import json  
-import json  
+import json
 import os
 
 # service bus queues  
@@ -51,22 +50,27 @@ class JobViewset(viewsets.ModelViewSet):
           
         # Add your custom code here  
         print("Creating job: ", serializer.data)  
-        send_message(fully_qualified_namespace, dispatch_queue, serializer.data['task'])  
+
+        json_data = json.dumps(serializer.data)
+        print("data: ", json.dumps(request.data))  
+        #send_message(fully_qualified_namespace, dispatch_queue, serializer.data['task'])  
+        send_message(fully_qualified_namespace, dispatch_queue, json_data)  
   
         headers = self.get_success_headers(serializer.data)  
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)  
 
     # delete method - we need to delete locally on the sqlite db and 
     # send a message to the delete queue in the service bus
-    def destroy(self, request, *args, **kwargs):  
+    def destroy(self, request, *args, **kwargs):    
         instance = self.get_object()  
-
-        # Send the task to the delete queue
-        send_message(fully_qualified_namespace, delete_queue, instance.task)
-        print("Deleting job: ", instance.task)
-        self.perform_destroy(instance)
-
+        serializer = self.get_serializer(instance)  
+        json_data = json.dumps(serializer.data)
+        send_message(fully_qualified_namespace, delete_queue, json_data)  
+        self.perform_destroy(instance)  
         return Response(status=status.HTTP_204_NO_CONTENT)
+  
+    def perform_destroy(self, instance):  
+        instance.delete()
   
 def import_data(request):    
     try:  
@@ -96,4 +100,4 @@ def import_data(request):
             "error": str(e)  
         }  
           
-    return JsonResponse(message)  
+    return JsonResponse(message)

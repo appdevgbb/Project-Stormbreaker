@@ -12,7 +12,7 @@ export default function CreateNewJob() {
   const crud_url = `http://${host}:${port}/api/jobs/`;
 
   const [validationErrors, setValidationErrors] = React.useState({});
-  const options_available = ["Guam", "Katrina", "Gustav"];
+  const options_available = ["Guam", "Gustav", "Katrina"];
 
   const fetchData = async () => {
     setIsLoading(true);

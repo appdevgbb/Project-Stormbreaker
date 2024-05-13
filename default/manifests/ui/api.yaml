@@ -24,8 +24,8 @@ spec:
       labels:
         app: stormbreaker-api
         azure.workload.identity/use: "true"
-      annotations:
-        azure.workload.identity/inject-proxy-sidecar: "true"
+      #annotations:
+      #  azure.workload.identity/inject-proxy-sidecar: "true"
     spec:
       serviceAccount: workload-identity-sa
       affinity:

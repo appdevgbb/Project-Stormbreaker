@@ -23,11 +23,11 @@ spec:
     metadata:
       labels:
         app: stormbreaker-frontend
-        azure.workload.identity/use: "true"
-      annotations:
-        azure.workload.identity/inject-proxy-sidecar: "true"
+        #azure.workload.identity/use: "true"
+      #annotations:
+      #  azure.workload.identity/inject-proxy-sidecar: "true"
     spec:
-      serviceAccountName: workload-identity-sa
+      #serviceAccountName: workload-identity-sa
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -48,8 +48,8 @@ spec:
                 name: env-config
           resources:
             limits:
-              cpu: "1"
-              memory: 1Gi
+              cpu: "2"
+              memory: 2Gi
             requests:
               cpu: "1"
               memory: 1Gi
