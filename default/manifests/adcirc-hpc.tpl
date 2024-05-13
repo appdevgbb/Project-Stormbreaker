@@ -1,3 +1,5 @@
+adcirc-hpc.tpl
+root@podman-in-a-pod:/mnt/input/templates# cat adcirc-hpc.tpl 
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,14 +16,14 @@ data:
       
     mkdir -p $WORKDIR
     cd $WORKDIR
-    cp $TEST_DIR/* $WORKDIR
+    cp -r $TEST_DIR/* $WORKDIR
 
-    adcprep --np $(($NP-10)) --partmesh > adcprep.txt
-    adcprep --np $(($NP-10)) --prepall  >> adcprep.txt
-    mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc -W 10 > padcirc.log
- 
+    adcprep --np $(($NP-10)) --partmesh | tee adcprep.txt # for a better performance, redirect to a file instead of using tee
+    adcprep --np $(($NP-10)) --prepall  | tee adcprep.txt
+    mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc -W 10 | tee padcirc.log
+
     cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/
-
+    touch /mnt/output/run/completed/$JOB_NAME
     # MPI job exit status
     exit $?
 ---
@@ -113,7 +115,12 @@ spec:
               lifecycle: # copy all of the files from the scratchpad to Blob
                 preStop:
                   exec:  
-                    command: ["/bin/sh", "-c", "cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME"]
+                    command: 
+                    - "/bin/sh"
+                    - "-c"
+                    - |
+                      cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/  &&
+                      touch /mnt/output/run/completed/$JOB_NAME
           volumes:
           - name: input
             persistentVolumeClaim:
