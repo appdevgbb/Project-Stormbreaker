@@ -45,5 +45,5 @@ for file_name in completed_files:
                 print("Nothing to do here. File not found - " + file_name)
             
             # Execute the kubectl command to delete the job from the database           
-            subprocess.run(["kubectl", "exec", "stormbreaker-api-0", "sqlite3", "db.sqlite3", "'delete from  api_job where task == " + task_value + "'"], check=True)
+            subprocess.run(["kubectl", "exec", "stormbreaker-api-0", "--", "sqlite3", "db.sqlite3", "delete from  api_job where task == '" + task_value + "'"], check=True)
             print("Deleted job from database - " + task_value)
