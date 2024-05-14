@@ -9,6 +9,7 @@ load_env() {
   # dynamic values loaded from Terraform
   export TF_OUTPUTS=$(terraform output -json | jq -r)
   export AKS_CLUSTER_NAME=$(echo "$TF_OUTPUTS" | jq -r .aks_cluster_name.value)
+  export ACR_NAME=$(terraform output -json acr | jq -r .login_server)
   export AZ_MONITOR_WORKSPACE_ID=$(echo $TF_OUTPUTS | jq -r .azure_monitor_workspace_id.value)
   export GRAFANA_RESOURCE_ID=$(echo $TF_OUTPUTS | jq -r .grafana_resource_id.value)
   export RESOURCE_GROUP_NAME=$(echo $TF_OUTPUTS | jq -r .resource_group_name.value)
@@ -21,6 +22,7 @@ load_env() {
   echo "***************************************************"
   echo "AZ_MONITOR_WORKSPACE_ID: " $AZ_MONITOR_WORKSPACE_ID
   echo "AKS_CLUSTER_NAME: " $AKS_CLUSTER_NAME
+  echo "ACR_NAME: " $ACR_NAME
   echo "NAMESPACE: " "default"
   echo "RESOURCE_GROUP_NAME: " $RESOURCE_GROUP_NAME
   echo "STORAGE_ACCOUNT: " $STORAGE_ACCOUNT
@@ -104,10 +106,13 @@ create_nfs_workload() {
   cp manifests/{nginx-pod-blob.yaml,pvc-blob-nfs.yaml} output/
 }
 
-create_keda_template() {
-  echo "Creating KEDA files"
-  sed "s/SERVICEBUS_NAME/$SERVICEBUS_NAME/g;" manifests/keda.tpl > output/keda.yaml
-}
+create_keda_template() {  
+  echo "Creating KEDA files"  
+  sed "s/SERVICEBUS_NAME/$SERVICEBUS_NAME/g; 
+    s/USER_ASSIGNED_CLIENT_ID/$USER_ASSIGNED_CLIENT_ID/g; 
+    s/ACR_NAME/$ACR_NAME/g; s/STORAGE_ACCOUNT/$STORAGE_ACCOUNT/g; 
+    s/AZURE_CLIENT_ID_VALUE/$AZURE_CLIENT_ID_VALUE/g;" manifests/keda.tpl > output/keda.yaml  
+}  
 
 do_generate_kubeconfig() {
   terraform output -raw kubeconfig >config

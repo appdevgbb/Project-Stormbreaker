@@ -47,3 +47,9 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "filesystem-out" {
     azurerm_storage_account.stormbreaker
   ]
 }
+
+resource "azurerm_role_assignment" "stormbreaker-storage-account" {
+  scope                = azurerm_storage_account.stormbreaker.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.managed-id.principal_id
+}

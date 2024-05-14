@@ -78,7 +78,9 @@ Cluster_Boundary(cluster, "Azure Kubernetes Cluster") {
     Nodepool_Boundary(npSystem, "System") {
         KubernetesPod(KEDAremover, "Remover", "KEDA")
         KubernetesPod(KEDAdispatcher, "Dispatcher", "KEDA")
-        KubernetesPod(ui, "UI", "stormbreaker-ui")
+        KubernetesPod(KEDAComplete, "Complete", "KEDA")
+        KubernetesPod(frontend, "FRONTEND", "stormbreaker-frontend")
+        KubernetesPod(backend, "BACKEND", "stormbreaker-backend")
     }
     ' ADCIRCHPC Node Pool
     Nodepool_Boundary(npAdcirc, "ADCIRCHPC") {
@@ -102,18 +104,22 @@ Cluster_Boundary(cluster, "Azure Kubernetes Cluster") {
 
 Rel_U(cluster, acr, "pulls image for each model")
 
-Rel(User, ui, "HTTP", "ASYNC")
+Rel(User, frontend, "HTTP", "ASYNC")
+Rel_U(frontend, backend, "HTTP", "ASYNC")
 
 ' task deletion
-Rel(ui, queueDelete, " ")
+Rel(backend, queueDelete, " ")
 Rel_Neighbor(queueDelete, KEDAremover, " ")
 Rel(KEDAremover, KubernetesApi, "sends volcano job for deletion")
 
 ' task creation
-Rel(ui, queueDispatch, " ")
+Rel(backend, queueDispatch, " ")
 Rel(KEDAdispatcher, KubernetesApi, "sends volcano job for creation")
 Rel_Neighbor(queueDispatch, KEDAdispatcher, " ")
 Rel(KEDAdispatcher, queueRunning, " ")
+
+' task compeltion
+Rel(KEDAComplete, ADLS, "reads from")
 
 ' volcano jobs
 Rel(KubernetesApi, KubernetesSched, "schedules job based on node selector")

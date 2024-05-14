@@ -2,7 +2,9 @@
 title Task Deletion
 
 actor User
-participant "UI" as UI
+
+participant "REACT FRONTEND" as FRONTEND
+participant "DJANGO BACKEND" as BACKEND
 
 participant "Service Bus Queue:\nDelete" as SB_Delete
 participant "KEDA:\nservicebus-remover" as KEDA_Remover
@@ -13,8 +15,9 @@ participant "Kubernetes API" as K8S_API
 autonumber
 hide footbox
 
-User -> UI: deletes task
-UI -> SB_Delete: sends task to queue
+User -> FRONTEND: deletes task
+FRONTEND -> BACKEND: sends task to BACKEND
+BACKEND -> SB_Delete: sends task to queue
 KEDA_Remover -> SB_Delete: removes task from queue
 KEDA_Remover -> SB_Running: removes task from queue
 

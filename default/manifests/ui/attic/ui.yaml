@@ -11,7 +11,11 @@ spec:
     metadata:  
       labels:  
         app: stormbreaker-ui
+        azure.workload.identity/use: "true"
+      annotations:
+        azure.workload.identity/inject-proxy-sidecar: "true"
     spec:
+      serviceAccountName: workload-identity-sa
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -34,9 +38,9 @@ spec:
             value: "dcq1running"
           - name: SERVICE_BUS_QUEUE_DELETE
             value: "dcq1delete"
-        resources:
-          limits:
-            cpu: 2
-            memory: 1Gi
+#        resources:
+#          limits:
+#            cpu: 2
+#            memory: 1Gi
         ports:
         - containerPort: 8501
