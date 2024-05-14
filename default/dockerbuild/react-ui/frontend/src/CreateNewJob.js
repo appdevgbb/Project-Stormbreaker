@@ -14,6 +14,25 @@ export default function CreateNewJob() {
   const [validationErrors, setValidationErrors] = React.useState({});
   const options_available = ["Guam", "Gustav", "Katrina"];
 
+  const sku = [
+    "Standard_HB120-16rs_v3",
+    "Standard_HB120-32rs_v3",
+    "Standard_HB120-64s_v3",
+    "Standard_HB120-96rs_v3",
+    "Standard_HB120s_v3",
+  ];
+
+  const skuCores = {
+    "Standard_HB120-16rs_v3": 16,
+    "Standard_HB120-32rs_v3": 32,
+    "Standard_HB120-64s_v3": 64,
+    "Standard_HB120-96rs_v3": 96,
+    "Standard_HB120s_v3": 120,
+  };
+
+  const nodeNumbers = [1, 2, 3];
+
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -59,10 +78,31 @@ export default function CreateNewJob() {
           helperText: validationErrors?.simulation,
         },
       },
-
+      {
+        accessorKey: "sku",
+        header: "SKU",
+        editVariant: "select",
+        editSelectOptions: sku,
+        muiEditTextFieldProps: {
+          select: true,
+          error: !!validationErrors?.sku,
+          helperText: validationErrors?.sku,
+        },
+      },
+      {
+        accessorKey: "nodeNumber",
+        header: "Number of Nodes",
+        editVariant: "select",
+        editSelectOptions: nodeNumbers,
+        muiEditTextFieldProps: {
+          select: true,
+          error: !!validationErrors?.nodeNumber,
+          helperText: validationErrors?.nodeNumber,
+        },
+      },
       {
         accessorKey: "np",
-        header: "NP",
+        header: "Total number of cores",
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.np,
@@ -74,10 +114,9 @@ export default function CreateNewJob() {
             }),
         },
       },
-
       {
         accessorKey: "slots",
-        header: "Slots",
+        header: "Cores per node",
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.slots,
@@ -104,31 +143,45 @@ export default function CreateNewJob() {
     }
   };
 
-  const validateSelect = (value, options) => {
-    return options.includes(value);
-  };
-
   const validateMinNumber = (value, minimum) => {
     return value > minimum;
+  };
+
+  const validateSelect = (value, options) => {
+    if (!options.includes(value)) {
+      return "Option Unavailable";
+    } else {
+      return "";
+    }
+  };
+
+  const validateNP = (np, nodeNumber, slots) => {
+    const maximumValue = nodeNumber * slots;
+    if (np > maximumValue) {
+      return `Invalid number of cores. Maximum value allowed: ${maximumValue}`;
+    } else {
+      return "";
+    }
+  };
+
+  const validateSlots = (slots, sku) => {
+    const maximumValue = skuCores[sku];
+    if (slots > maximumValue) {
+      return `Invalid number of cores. Maximum value allowed: ${maximumValue}`;
+    } else {
+      return "";
+    }
   };
 
   function validateData(data) {
     return {
       name: validateLength(data.customer, "Customer", 1),
-      simulation: !validateSelect(data.simulation, options_available)
-        ? "Option Unavailable"
-        : "",
-      np: !validateMinNumber(data.np, 0)
-        ? "NP cannot be less than 0"
-        : "",
-      slots: !validateMinNumber(data.slots, 0)
-        ? "Number of slots cannot be less than 0"
-        : "",
+      simulation: validateSelect(data.simulation, options_available),
+      sku: validateSelect(data.sku, sku),
+      np: validateNP(data.np, data.nodeNumber, data.slots),
+      slots: validateSlots(data.slots, data.sku),
     };
   }
-
-
-
   return (
     <React.Fragment>
       <CrudTable

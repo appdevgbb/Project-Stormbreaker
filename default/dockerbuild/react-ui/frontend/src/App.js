@@ -5,7 +5,6 @@ import Dashboard from "./Dashboard";
 import Layout from "./Layout";
 import About from "./About";
 import CreateNewJob from './CreateNewJob'
-import Settings from "./Settings";
 
 function App() {
   return (
@@ -14,7 +13,6 @@ function App() {
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="new" element={<CreateNewJob />} />
-          <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
         </Route>
       </Routes>

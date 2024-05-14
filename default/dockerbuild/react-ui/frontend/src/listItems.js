@@ -4,7 +4,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import RocketIcon from "@mui/icons-material/Rocket";
-import PeopleIcon from "@mui/icons-material/People";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import { Link } from "react-router-dom";
 
@@ -21,12 +20,6 @@ export const mainListItems = (
         <RocketIcon />
       </ListItemIcon>
       <ListItemText primary="New Job" />
-    </ListItemButton>
-    <ListItemButton to="/settings" component={Link}>
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Settings" />
     </ListItemButton>
     <ListItemButton to="/about" component={Link}>
       <ListItemIcon>
