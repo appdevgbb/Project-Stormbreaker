@@ -1,4 +1,6 @@
-# Use the base image
+# build with: 
+# podman build --format docker -t stormbreakeracrdc.azurecr.io/delft3d:1.0 .
+# Use the provided base image
 FROM stormbreakeracrdc.azurecr.io/hpccm:base-4
 
 # Set environment to bash
@@ -41,12 +43,17 @@ ENV LD_LIBRARY_PATH="/opt/intel/oneapi/2024.2/lib:/opt/intel/oneapi/compiler/202
 ENV PATH="/home/delft3d/bin:$PATH"
 ENV MAKEFLAGS="-j $(nproc)"
 ENV SRCDIR="/home/delft3d/src"
+ENV PKG_CONFIG_PATH="/home/delft3d/lib/pkgconfig:$PKG_CONFIG_PATH"
+ENV PKG_CONFIG_PATH="/home/delft3d/lib64/pkgconfig:$PKG_CONFIG_PATH"
+ENV C_INCLUDE_PATH="/home/delft3d/include"
+ENV CPLUS_INCLUDE_PATH="/home/delft3d/include"
+ENV PATH=/home/delft3d/bin:$PATH
+
+
+COPY patches /home/deflt3d/src/patches
 
 # Create necessary directories
 RUN mkdir -p /home/delft3d/src && mkdir -p /home/delft3d/
-
-# Copy the patches directory into the image
-COPY patches /home/delft3d/src/patches
 
 # Download sources
 WORKDIR /home/delft3d/src
@@ -77,13 +84,13 @@ RUN tar -xzvf hdf5-1_10_5.tar.gz && \
     cd $SRCDIR
 
 # Set Intel compiler environment variables
-RUN source /opt/intel/oneapi/setvars.sh
 ENV FC=mpiifx
 ENV CXX=mpiicpx
 ENV CC=mpiicx
 
 # Install netcdf-c library
-RUN tar -xzvf netcdf-c-4.9.2.tar.gz && \
+RUN source /opt/intel/oneapi/setvars.sh && \
+    tar -xzvf netcdf-c-4.9.2.tar.gz && \
     cd netcdf-c-4.9.2 && \
     export CPPFLAGS='-I/home/delft3d/include' && \
     export LDFLAGS='-L/home/delft3d/lib' && \
@@ -94,7 +101,8 @@ RUN tar -xzvf netcdf-c-4.9.2.tar.gz && \
     cd $SRCDIR
 
 # Install netcdf-fortran library
-RUN tar -xzvf netcdf-fortran-4.6.1.tar.gz && \
+RUN source /opt/intel/oneapi/setvars.sh && \
+    tar -xzvf netcdf-fortran-4.6.1.tar.gz && \
     cd netcdf-fortran-4.6.1 && \
     export CPPFLAGS='-I/home/delft3d/include' && \
     export LDFLAGS='-L/home/delft3d/lib' && \
@@ -113,15 +121,16 @@ RUN tar xvzf petsc-with-docs-3.21.1.tar.gz && \
     cd $SRCDIR
 
 # Install googletest
-RUN tar -xvzf googletest-1.14.0.tar.gz && \
+RUN source /opt/intel/oneapi/setvars.sh && \
+    tar -xvzf googletest-1.14.0.tar.gz && \
     cd googletest-1.14.0/ && mkdir build && \
     cd build/ && cmake -DCMAKE_PREFIX_PATH=/home/delft3d -DCMAKE_INSTALL_PREFIX=/home/delft3d .. && \
     cmake --build . && \
     cmake --build . --target install && \
     cd $SRCDIR
-
 # Install proj-4.9.3
-RUN tar -xvzf proj-4.9.3.tar.gz && \
+RUN source /opt/intel/oneapi/setvars.sh && \
+    tar -xvzf proj-4.9.3.tar.gz && \
     cd proj-4.9.3 && \
     CFLAGS=-O0 ./configure --prefix=/home/delft3d && \
     make && \
@@ -130,10 +139,13 @@ RUN tar -xvzf proj-4.9.3.tar.gz && \
     cd $SRCDIR
 
 # Install gdal-2.0.0
-RUN tar -xvzf gdal-2.0.0.tar.gz && \
-    cp /home/delft3d/patches/gdal/* gdal-2.0.0/gdal/ && \
+COPY patches/ ./patches/
+RUN source /opt/intel/oneapi/setvars.sh && \
+    tar -xvzf gdal-2.0.0.tar.gz && \
+    ls && \
+    cp patches/gdal/* gdal-2.0.0/gdal/ && \
     cd gdal-2.0.0/gdal && \
-    sed -i 's/\r$//' frmts/jpeg2000/jpeg2000_vsil_io.cpp && \
+    sed -i 's/\r$//g' frmts/jpeg2000/jpeg2000_vsil_io.cpp && \
     for patch in patch-*.cpp; do \
       echo "Applying $patch..."; \
       patch -p0 <"$patch" | tee patch_log.txt 2>&1; \
@@ -144,11 +156,20 @@ RUN tar -xvzf gdal-2.0.0.tar.gz && \
     cd $SRCDIR
 
 # Checkout Delft3D from SVN and apply patches
-RUN svn checkout -r 142633 https://svn.oss.deltares.nl/repos/delft3d/trunk /home/delft3d/src/delft3d_142633 && \
-    cp /home/delft3d/patches/delft3d/* /home/delft3d/src/delft3d_142633/ && \
-    cd delft3D_142633 && \
+RUN svn checkout -r 142633 https://svn.oss.deltares.nl/repos/delft3d/trunk /home/delft3d/src/delft3d_142633
+RUN cp -r patches/delft3d/* delft3d_142633/ && \
+    cd delft3d_142633/ && \
     sed -i 's/\r$//g' src/utils_lgpl/deltares_common/packages/deltares_common_c/src/meminfo.cpp && \
-    patch -p0 <patch-src-setenv.sh && \
-    patch -p0 <patch-src-cmake-CMakeLists.txt && \
-    patch -p0 <patch-src-utils_lgpl-deltares_common-packages-deltares_common_c-src-meminfo.cpp && \
+    sed -i 's/\r$//g' src/cmake/CMakeLists.txt && \
+    patch -p0 < patch-src-setenv.sh && \
+    patch -p0 < patch-src-cmake-CMakeLists.txt && \
+    patch -p0 < patch-src-utils_lgpl-deltares_common-packages-deltares_common_c-src-meminfo.cpp && \
+    patch -p0 < patch-build.sh
+
+RUN source /opt/intel/oneapi/setvars.sh  && \
+    cd delft3d_142633/ && \
     ./build.sh delft3d4 --compiler intel21
+
+# setup environment
+RUN echo source /opt/intel/oneapi/setvars.sh >> /root/.bashrc && \
+    echo source /opt/intel/oneapi/setvars.sh >> /root/.profile  
