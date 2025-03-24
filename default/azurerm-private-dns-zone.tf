@@ -5,7 +5,7 @@ resource "azurerm_private_dns_zone" "acr" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "private-zone-link" {
   name                  = "stormbreaker-private-zone-link"
-  resource_group_name = azurerm_resource_group.default.name
+  resource_group_name   = azurerm_resource_group.default.name
   private_dns_zone_name = azurerm_private_dns_zone.acr.name
   virtual_network_id    = azurerm_virtual_network.stormbreaker-vnet.id
 }

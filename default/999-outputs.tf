@@ -41,7 +41,7 @@ output "grafana_resource_id" {
 }
 
 output "acr" {
-  value = azurerm_container_registry.default
+  value     = azurerm_container_registry.default
   sensitive = true
 }
 
@@ -50,11 +50,11 @@ output "storage_account_name" {
 }
 
 output "container_name" {
-  value = azurerm_storage_data_lake_gen2_filesystem.filesystem.name
+  value = var.enable_filesystem_creation ? azurerm_storage_data_lake_gen2_filesystem.filesystem[0].name : null
 }
 
 output "azure_monitor_workspace_id" {
-  value = azapi_resource.azure_monitor_workspace.id
+  value = azurerm_monitor_workspace.stormbreaker_azure_monitor_workspace
 }
 
 output "servicebus_name" {

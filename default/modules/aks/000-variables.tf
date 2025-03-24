@@ -13,7 +13,7 @@
  * - aks_settings: The settings for the AKS cluster.
  * - default_node_pool: The settings for the default node pool.
  * - user_node_pools: The settings for the user-defined node pools.
- */ 
+ */
 variable "prefix" {
   type = string
 }
@@ -63,7 +63,7 @@ variable "aks_settings" {
     ssh_key                 = string
     blob_driver_enabled     = bool
     keda_enabled            = bool
-  
+
   })
   default = {
     kubernetes_version      = null
@@ -85,50 +85,50 @@ variable "aks_settings" {
 
 variable "default_node_pool" {
   type = object({
-    name                = string
-    enable_auto_scaling = bool
-    node_count          = number
-    min_count           = number
-    max_count           = number
-    vm_size             = string
-    type                = string
-    os_disk_size_gb     = number
+    name                         = string
+    enable_auto_scaling          = bool
+    node_count                   = number
+    min_count                    = number
+    max_count                    = number
+    vm_size                      = string
+    type                         = string
+    os_disk_size_gb              = number
     proximity_placement_group_id = string
   })
 
   default = {
-    name                = "defaultnp"
-    enable_auto_scaling = true
-    node_count          = 2
-    min_count           = 2
-    max_count           = 5
-    vm_size             = "Standard_D4s_v3"
-    type                = "VirtualMachineScaleSets"
-    os_disk_size_gb     = 30
+    name                         = "defaultnp"
+    enable_auto_scaling          = true
+    node_count                   = 2
+    min_count                    = 2
+    max_count                    = 5
+    vm_size                      = "Standard_D4s_v3"
+    type                         = "VirtualMachineScaleSets"
+    os_disk_size_gb              = 30
     proximity_placement_group_id = null
   }
 }
 
 variable "user_node_pools" {
   type = map(object({
-    vm_size     = string
-    node_count  = number
-    node_labels = map(string)
-    node_taints = list(string)
-    zones       = list(string)
+    vm_size                      = string
+    node_count                   = number
+    node_labels                  = map(string)
+    node_taints                  = list(string)
+    zones                        = list(string)
     proximity_placement_group_id = string
-    ultra_ssd_enabled = bool
+    ultra_ssd_enabled            = bool
   }))
 
   default = {
     "usernp1" = {
-      vm_size     = "Standard_D4s_v3"
-      node_count  = 3
-      node_labels = null
-      node_taints = []
-      zones       = [3]
+      vm_size                      = "Standard_D4s_v3"
+      node_count                   = 3
+      node_labels                  = null
+      node_taints                  = []
+      zones                        = [3]
       proximity_placement_group_id = null
-      ultra_ssd_enabled = false
+      ultra_ssd_enabled            = false
     }
   }
 }

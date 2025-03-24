@@ -5,16 +5,16 @@
  * resources and rolling instances when required. Additionally, it defines several resources, 
  * including a random string suffix, a random password for a certificate, and a local variable 
  * for the zone name.
- */ 
+ */
 terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.88.0"
+      version = "~> 4.24.0"
     }
     azapi = {
       source  = "azure/azapi"
-      version = ">=1.5.0"
+      version = ">=2.3.0"
     }
   }
 }
@@ -22,9 +22,9 @@ terraform {
 provider "azurerm" {
   features {
     resource_group {
-     prevent_deletion_if_contains_resources = false
+      prevent_deletion_if_contains_resources = false
     }
-    }
+  }
 }
 
 data "azurerm_subscription" "current" {

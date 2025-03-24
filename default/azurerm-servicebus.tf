@@ -10,22 +10,16 @@ resource "azurerm_servicebus_namespace" "stormbreaker-servicebus" {
 resource "azurerm_servicebus_queue" "dispatch" {
   name         = "stormbreaker-dispatch"
   namespace_id = azurerm_servicebus_namespace.stormbreaker-servicebus.id
-
-  enable_partitioning = true
 }
 
 resource "azurerm_servicebus_queue" "running" {
   name         = "stormbreaker-running"
   namespace_id = azurerm_servicebus_namespace.stormbreaker-servicebus.id
-
-  enable_partitioning = true
 }
 
 resource "azurerm_servicebus_queue" "delete" {
   name         = "stormbreaker-delete"
   namespace_id = azurerm_servicebus_namespace.stormbreaker-servicebus.id
-
-  enable_partitioning = true
 }
 
 # data "azurerm_user_assigned_identity" "managed-id" {

@@ -5,6 +5,19 @@ set -euo pipefail
 # create the output directory for our files
 mkdir -p output
 
+# Default SSH key path
+KEY_PATH="$HOME/.ssh/id_rsa"
+
+# Check if key exists
+if [ -f "$KEY_PATH" ] && [ -f "$KEY_PATH.pub" ]; then
+  echo "SSH key already exists at $KEY_PATH"
+else
+  echo "SSH key not found. Generating a new one..."
+  mkdir -p "$HOME/.ssh"
+  ssh-keygen -t rsa -b 4096 -f "$KEY_PATH" -N "" -C "your_email@example.com"
+  echo "SSH key generated at $KEY_PATH"
+fi
+
 load_env() {
   # dynamic values loaded from Terraform
   export TF_OUTPUTS=$(terraform output -json | jq -r)
@@ -35,13 +48,10 @@ load_env() {
 }
 
 # We need the following providers for this demo
-# - Microsoft.ContainerService/AKS-PrometheusAddonPreview
-# - Microsoft.ContainerService/EnableWorkloadIdentityPreview
+# - Microsoft.ContainerService/AKS-PrometheusAddon
 # - Microsoft.ContainerService/EnableEncryptionAtHostPreview
 # - Microsoft.Compute/EncryptionAtHost
 demo_providers() {
-  az extension update --name aks-preview
-
   local _AZURE_NAMESPACE=$(echo $1 | awk -F '/' '{print $1}')
   local _FLAGS=$(echo $1 | awk -F '/' '{print $2}')
 
@@ -103,7 +113,7 @@ create_nfs_workload() {
     s/STORAGE_ACCOUNT/$STORAGE_ACCOUNT/g;
     s/CONTAINER_NAME/$CONTAINER_NAME/g" manifests/pv-blob-nfs.tpl > output/pv-blob-nfs.yaml
 
-  cp manifests/{nginx-pod-blob.yaml,pvc-blob-nfs.yaml} output/
+  cp manifests/hpc/{nfs-server.yaml,pvc-blob-nfs.yaml} output/
 }
 
 create_keda_template() {  
@@ -111,7 +121,7 @@ create_keda_template() {
   sed "s/SERVICEBUS_NAME/$SERVICEBUS_NAME/g; 
     s/USER_ASSIGNED_CLIENT_ID/$USER_ASSIGNED_CLIENT_ID/g; 
     s/ACR_NAME/$ACR_NAME/g; s/STORAGE_ACCOUNT/$STORAGE_ACCOUNT/g; 
-    s/AZURE_CLIENT_ID_VALUE/$AZURE_CLIENT_ID_VALUE/g;" manifests/keda.tpl > output/keda.yaml  
+    s/AZURE_CLIENT_ID_VALUE/$USER_ASSIGNED_CLIENT_ID/g;" manifests/keda.tpl > output/keda.yaml  
 }  
 
 do_generate_kubeconfig() {
@@ -141,6 +151,10 @@ do_enable_cost_analysis() {
     --enable-cost-analysis
 }
 
+do_deploy_volcano() {
+  kubectl apply -f https://raw.githubusercontent.com/volcano-sh/volcano/master/installer/volcano-development.yaml
+}
+
 # we start here
 do_demo_bootstrap() {
   load_env
@@ -150,4 +164,5 @@ do_demo_bootstrap() {
   do_generate_kubeconfig
   do_deploy_nfs_workload
   do_enable_cost_analysis
+  do_deploy_volcano
 }

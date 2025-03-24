@@ -1,2 +1,2 @@
-prefix         = "dc"
-location       = "westus3"
+prefix   = "dc"
+location = "westus3"

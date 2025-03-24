@@ -50,16 +50,16 @@ module "aks" {
   subnet_id      = azurerm_subnet.stormbreaker-cluster.id
   resource_group = azurerm_resource_group.default
 
- # ACR
+  # ACR
   container_registry_id = azurerm_container_registry.default.id
-  acr_subnet_id  = azurerm_subnet.acr.id
+  acr_subnet_id         = azurerm_subnet.acr.id
   acr_private_dns_zone_ids = [
     azurerm_private_dns_zone.acr.id
   ]
-  
-  cluster_name        = "stormbreaker-cluster"
+
+  cluster_name = "stormbreaker-cluster"
   aks_settings = {
-    kubernetes_version      = "1.28.3"
+    kubernetes_version      = "1.30.9"
     private_cluster_enabled = false
     identity                = "UserAssigned"
     outbound_type           = "loadBalancer"
@@ -90,27 +90,6 @@ module "aks" {
   }
 
   user_node_pools = {
-    "hecras" = {
-      vm_size                      = "standard_d4_v5"
-      node_count                   = 0
-      node_labels                  = null
-      node_taints                  = ["layer=hec-ras:NoSchedule"]
-      proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
-      zones                        = [3]
-      ultra_ssd_enabled            = false
-    }
-
-    "hecraswin" = {
-      vm_size                      = "standard_d4_v5"
-      node_count                   = 0
-      node_labels                  = null
-      node_taints                  = ["layer=hec-ras-win:NoSchedule"]
-      os_type			                 = "Windows"
-      proximity_placement_group_id = azurerm_proximity_placement_group.dev.id
-      zones                        = [3]
-      ultra_ssd_enabled            = false
-    }
-
     "adcirchpc" = {
       vm_size                      = "Standard_HB120-16rs_v3"
       node_count                   = 3

@@ -28,14 +28,14 @@ resource "azurerm_kubernetes_cluster" "dev" {
   monitor_metrics {}
 
   default_node_pool {
-    name                = var.default_node_pool.name
-    enable_auto_scaling = var.default_node_pool.enable_auto_scaling
-    min_count           = var.default_node_pool.min_count
-    max_count           = var.default_node_pool.max_count
-    vm_size             = var.default_node_pool.vm_size
-    os_disk_size_gb     = var.default_node_pool.os_disk_size_gb
-    type                = var.default_node_pool.type
-    vnet_subnet_id      = var.subnet_id
+    name                         = var.default_node_pool.name
+    min_count                    = var.default_node_pool.min_count
+    max_count                    = var.default_node_pool.max_count
+    vm_size                      = var.default_node_pool.vm_size
+    os_disk_size_gb              = var.default_node_pool.os_disk_size_gb
+    auto_scaling_enabled         = true
+    type                         = var.default_node_pool.type
+    vnet_subnet_id               = var.subnet_id
     proximity_placement_group_id = var.default_node_pool.proximity_placement_group_id
   }
 
@@ -54,13 +54,13 @@ resource "azurerm_kubernetes_cluster" "dev" {
   }
 
   network_profile {
-    network_plugin    = var.aks_settings.network_plugin
+    network_plugin      = var.aks_settings.network_plugin
     network_plugin_mode = var.aks_settings.network_plugin_mode
-    network_policy    = var.aks_settings.network_policy
-    load_balancer_sku = var.aks_settings.load_balancer_sku
-    service_cidr      = var.aks_settings.service_cidr
-    dns_service_ip    = var.aks_settings.dns_service_ip
-    outbound_type     = var.aks_settings.private_cluster_enabled == true ? "userDefinedRouting" : "loadBalancer"
+    network_policy      = var.aks_settings.network_policy
+    load_balancer_sku   = var.aks_settings.load_balancer_sku
+    service_cidr        = var.aks_settings.service_cidr
+    dns_service_ip      = var.aks_settings.dns_service_ip
+    outbound_type       = var.aks_settings.private_cluster_enabled == true ? "userDefinedRouting" : "loadBalancer"
   }
 
   storage_profile {
@@ -68,11 +68,11 @@ resource "azurerm_kubernetes_cluster" "dev" {
   }
 
   workload_autoscaler_profile {
-    keda_enabled        = var.aks_settings.keda_enabled
+    keda_enabled = var.aks_settings.keda_enabled
   }
-  
+
   oms_agent {
-    log_analytics_workspace_id = var.log_analytics_workspace
+    log_analytics_workspace_id      = var.log_analytics_workspace
     msi_auth_for_monitoring_enabled = true
   }
 
@@ -99,15 +99,15 @@ resource "azurerm_kubernetes_cluster" "dev" {
 resource "azurerm_kubernetes_cluster_node_pool" "user" {
   for_each = var.user_node_pools
 
-  name                  = each.key
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.dev.id
-  vm_size               = each.value.vm_size
-  node_count            = each.value.node_count
-  mode                  = "User"
-  node_labels           = each.value.node_labels
-  vnet_subnet_id        = var.subnet_id
-  node_taints           = each.value.node_taints
+  name                         = each.key
+  kubernetes_cluster_id        = azurerm_kubernetes_cluster.dev.id
+  vm_size                      = each.value.vm_size
+  node_count                   = each.value.node_count
+  mode                         = "User"
+  node_labels                  = each.value.node_labels
+  vnet_subnet_id               = var.subnet_id
+  node_taints                  = each.value.node_taints
   proximity_placement_group_id = each.value.proximity_placement_group_id
-  ultra_ssd_enabled     = each.value.ultra_ssd_enabled
-  zones                 = each.value.zones
+  ultra_ssd_enabled            = each.value.ultra_ssd_enabled
+  zones                        = each.value.zones
 }

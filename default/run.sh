@@ -17,6 +17,7 @@ set -e
 # - jq
 # - terraform
 
+source .envrc
 source install-demo.sh
 
 __usage="
@@ -59,13 +60,20 @@ checkDependencies() {
     exit 1
   fi
 
-  # we need to check for the demo depencies here before running TF
+  # we need to check for the demo dependencies here before running TF
   local _AZURE_FEATURES="
-    Microsoft.ContainerService/AKS-PrometheusAddonPreview 
-    Microsoft.ContainerService/EnableWorkloadIdentityPreview
+    Microsoft.ContainerService/AKS-PrometheusAddonPreview
     Microsoft.ContainerService/EnableEncryptionAtHostPreview
     Microsoft.ContainerService/AKSInfinibandSupport
     Microsoft.Compute/EncryptionAtHost"
+
+  if ! az extension show --name aks-preview &> /dev/null; then
+    echo "aks-preview extension not found. Installing..."
+    az extension add --name aks-preview
+  else
+    echo "aks-preview extension already installed. Updating..."
+    az extension update --name aks-preview
+  fi
 
   for i in ${_AZURE_FEATURES}; do
     demo_providers $i
@@ -86,6 +94,7 @@ terraformDance() {
   terraform init
   terraform plan -out tfplan
   terraform apply -auto-approve tfplan
+  terraform apply -var="temporary_allow_network=true" -var="enable_filesystem_creation=true"
 }
 
 show() {
