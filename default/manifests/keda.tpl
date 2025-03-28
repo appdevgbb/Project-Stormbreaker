@@ -88,6 +88,9 @@ spec:
     completions: 1
     backoffLimit: 4
     template:
+      metadata:
+        labels:
+          azure.workload.identity/use: "true"
       spec:
         affinity:
             nodeAffinity:
@@ -106,7 +109,7 @@ spec:
           command: ["python3", "/usr/src/app/servicebus_remover.py"]          
           env:
           - name: SERVICE_BUS_FQDN
-            value: 'SERVICEBUS_NAME.windows.net'
+            value: 'SERVICEBUS_NAME.servicebus.windows.net'
           - name: SERVICE_BUS_QUEUE_DELETE
             value: "stormbreaker-delete"
           - name: SERVICE_BUS_QUEUE_RUNNING
@@ -135,7 +138,7 @@ spec:
   triggers:
   - type: azure-servicebus  
     metadata:  
-      queueName: delete # service bus queue
+      queueName: stormbreaker-delete # service bus queue
       queueLength: '1'
       namespace: SERVICEBUS_NAME # service bus namespace
     authenticationRef:
@@ -182,10 +185,10 @@ spec:
           - name: servicebus-completed
             image: ACR_NAME/misc/servicebus-complete:1.0
             imagePullPolicy: Always
-            command: ["python3", "/usr/src/app/servicebus_complete.py"]
+            command: ["python3", "/usr/src/app/servicebus_completed.py"]
             env:
               - name: SERVICE_BUS_FQDN
-                value: "SERVICEBUS_NAMEservicebus.windows.net"
+                value: "SERVICEBUS_NAME.servicebus.windows.net"
               - name: SERVICE_BUS_QUEUE_RUNNING
                 value: "stormbreaker-running"
               - name: AZURE_CLIENT_ID

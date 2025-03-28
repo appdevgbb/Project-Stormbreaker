@@ -32,3 +32,12 @@ resource "azurerm_role_assignment" "stormbreaker-servicebus" {
   role_definition_name = "Azure Service Bus Data Owner"
   principal_id         = azurerm_user_assigned_identity.managed-id.principal_id
 }
+
+resource "azurerm_federated_identity_credential" "stormbreaker-servicebus-federated-identity" {
+  name                = "stormbreaker-federatred-identity"
+  resource_group_name = azurerm_resource_group.default.name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = module.aks.oidc_url
+  parent_id           = azurerm_user_assigned_identity.managed-id.id
+  subject             = "system:serviceaccount:default:workload-identity-sa"
+}

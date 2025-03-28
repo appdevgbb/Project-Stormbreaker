@@ -1,18 +1,16 @@
-adcirc-hpc.tpl
-root@podman-in-a-pod:/mnt/input/templates# cat adcirc-hpc.tpl 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cm-adcirc-$JOB_NAME
+  name: cm-adcirc-3b8d7dde-0301-498b-8839-634d77eb290c
 data:
   entrypoint.sh: |-
     #!/usr/bin/bash -l
     mkdir -p /var/run/sshd; /usr/sbin/sshd
-    TEST_DIR=/mnt/input/simulations/adcirc/$JOB_SIMULATION
+    TEST_DIR=/mnt/input/simulations/adcirc/katrina
     LD_LIBRARY_PATH="/home/stormbreaker/install/lib"
-    WORKDIR=/mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME/
-    SLOTS=$JOB_SLOTS # pe:4 * 16 (16 cores)
-    NP=$JOB_NP       # SLOTS * Number of VMs
+    WORKDIR=/mnt/scratchpad/miami/katrina/3b8d7dde-0301-498b-8839-634d77eb290c/
+    SLOTS=12 # pe:4 * 16 (16 cores)
+    NP=36       # SLOTS * Number of VMs
       
     mkdir -p $WORKDIR
     cd $WORKDIR
@@ -22,8 +20,8 @@ data:
     adcprep --np $(($NP-10)) --prepall  | tee adcprep.txt
     mpiexec -x LD_LIBRARY_PATH --allow-run-as-root -np $NP -npernode $SLOTS --mca plm_rsh_args "-p 2222" --map-by core -hostfile /etc/volcano/mpiworker.host -x UCX_NET_DEVICES=mlx5_0:1 -mca ucx ^vader,tcp,openib,uct -x UCX_TLS=rc padcirc -W 10 | tee padcirc.log
 
-    cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/
-    touch /mnt/output/run/completed/$JOB_NAME
+    cp -r /mnt/scratchpad/miami/katrina/3b8d7dde-0301-498b-8839-634d77eb290c /mnt/output/run/miami/katrina/
+    touch /mnt/output/run/completed/3b8d7dde-0301-498b-8839-634d77eb290c
     # MPI job exit status
     exit $?
 ---
@@ -32,7 +30,7 @@ data:
 apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
-  name: job-$JOB_NAME
+  name: job-3b8d7dde-0301-498b-8839-634d77eb290c
 spec:
   minAvailable: 3
   schedulerName: volcano
@@ -75,12 +73,12 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  until [[ "$(kubectl get pod -l volcano.sh/job-name=job-$JOB_NAME,volcano.sh/task-spec=mpiworker -o json | jq '.items | length')" != 0 ]]; do
+                  until [[ "$(kubectl get pod -l volcano.sh/job-name=job-3b8d7dde-0301-498b-8839-634d77eb290c,volcano.sh/task-spec=mpiworker -o json | jq '.items | length')" != 0 ]]; do
                     echo "Waiting for MPI worker pods..."
                     sleep 3
                   done
                   echo "Waiting for MPI worker pods to be ready..."
-                  kubectl wait pod -l volcano.sh/job-name=job-$JOB_NAME,volcano.sh/task-spec=mpiworker --for=condition=Ready --timeout=600s
+                  kubectl wait pod -l volcano.sh/job-name=job-3b8d7dde-0301-498b-8839-634d77eb290c,volcano.sh/task-spec=mpiworker --for=condition=Ready --timeout=600s
               image: mcr.microsoft.com/oss/kubernetes/kubectl:v1.26.3
               name: wait-for-workers
           serviceAccount: sa-mpi-worker-view
@@ -119,8 +117,8 @@ spec:
                     - "/bin/sh"
                     - "-c"
                     - |
-                      cp -r /mnt/scratchpad/$JOB_CUSTOMER/$JOB_SIMULATION/$JOB_NAME /mnt/output/run/$JOB_CUSTOMER/$JOB_SIMULATION/  &&
-                      touch /mnt/output/run/completed/$JOB_NAME
+                      cp -r /mnt/scratchpad/miami/katrina/3b8d7dde-0301-498b-8839-634d77eb290c /mnt/output/run/miami/katrina/  &&
+                      touch /mnt/output/run/completed/3b8d7dde-0301-498b-8839-634d77eb290c
           volumes:
           - name: input
             persistentVolumeClaim:
@@ -134,7 +132,7 @@ spec:
           - name: adcirc-config
             configMap:
               defaultMode: 0700
-              name: cm-adcirc-$JOB_NAME 
+              name: cm-adcirc-3b8d7dde-0301-498b-8839-634d77eb290c 
           restartPolicy: Never
     - replicas: 3
       name: mpiworker
@@ -163,9 +161,9 @@ spec:
                 privileged: true
               resources:
                 requests:
-                  nvidia.com/mlnxnics: 1
+                  rdma/ib: 1
                 limits:
-                  nvidia.com/mlnxnics: 1
+                  rdma/ib: 1
               command:
               - /bin/sh
               - -c

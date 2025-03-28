@@ -41,7 +41,7 @@ usage() {
 
 checkDependencies() {
   # check if the dependencies are installed
-  local _NEEDED="az jq terraform"
+  local _NEEDED="az helm jq kubectl terraform"
   local _DEP_FLAG="false"
 
   echo -e "Checking dependencies ...\n"
@@ -94,7 +94,7 @@ terraformDance() {
   terraform init
   terraform plan -out tfplan
   terraform apply -auto-approve tfplan
-  terraform apply -var="temporary_allow_network=true" -var="enable_filesystem_creation=true"
+  terraform apply -auto-approve tfplan -var="temporary_allow_network=true" -var="enable_filesystem_creation=true"
 }
 
 show() {

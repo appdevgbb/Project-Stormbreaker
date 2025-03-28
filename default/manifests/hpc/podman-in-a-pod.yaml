@@ -13,7 +13,7 @@ spec:
             values:
             - adcirchpc
   containers:
-    - image:  stormbreakeracrdc.azurecr.io/adcirc-hpc:55.02.openmpi-ucx-rc-1
+    - image:  stormbreakeracrdc.azurecr.io/hpccm:base-1
       name: podman-in-a-pod
       securityContext:
         privileged: true

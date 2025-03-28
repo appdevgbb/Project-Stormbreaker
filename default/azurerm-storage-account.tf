@@ -1,12 +1,12 @@
 variable "temporary_allow_network" {
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
   description = "Temporarily allow network access for Storage Account"
 }
 
 variable "enable_filesystem_creation" {
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
   description = "Create Azure Data Lake Gen2 Filesystems"
 }
 
@@ -22,6 +22,8 @@ resource "azurerm_storage_account" "stormbreaker" {
 
   network_rules {
     default_action             = var.temporary_allow_network ? "Allow" : "Deny"
+    #default_action = "Deny"
+
     bypass                     = ["AzureServices", "Logging", "Metrics"]
     virtual_network_subnet_ids = [azurerm_subnet.stormbreaker-cluster.id]
     ip_rules                   = [data.http.myip.response_body]
@@ -57,6 +59,18 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "filesystem-out" {
   storage_account_id = azurerm_storage_account.stormbreaker.id
   depends_on = [
     azurerm_role_assignment.storage_blob_data_owner
+  ]
+}
+
+resource "azurerm_storage_data_lake_gen2_path" "completed-jobs" {
+  count              = var.enable_filesystem_creation ? 1 : 0
+  filesystem_name    = azurerm_storage_data_lake_gen2_filesystem.filesystem-out[count.index].name
+  path               = "run/completed"
+  resource           = "directory"
+  storage_account_id = azurerm_storage_account.stormbreaker.id
+
+  depends_on = [
+    azurerm_storage_data_lake_gen2_filesystem.filesystem-out
   ]
 }
 

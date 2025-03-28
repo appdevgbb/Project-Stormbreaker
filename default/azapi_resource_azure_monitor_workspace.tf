@@ -22,7 +22,7 @@
 
 
 resource "azurerm_monitor_workspace" "stormbreaker_azure_monitor_workspace" {
-  name      = "${var.prefix}-azure-monitor-workspace"
+  name                = "${var.prefix}-azure-monitor-workspace"
   resource_group_name = azurerm_resource_group.default.name
   location            = azurerm_resource_group.default.location
 }

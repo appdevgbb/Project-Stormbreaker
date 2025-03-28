@@ -7,5 +7,5 @@ data:
   SERVICE_BUS_QUEUE_DISPATCH: "stormbreaker-dispatch"
   SERVICE_BUS_QUEUE_RUNNING: "stormbreaker-running"
   SERVICE_BUS_QUEUE_DELETE: "stormbreaker-delete"
-  REACT_APP_STORMBREAKER_API_HOST: "stormbreaker-api-service"
+  REACT_APP_STORMBREAKER_API_HOST: "localhost"
   REACT_APP_STORMBREAKER_API_PORT: "8001"

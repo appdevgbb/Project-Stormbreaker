@@ -15,3 +15,7 @@ output "kube_config" {
 output "oidc_url" {
   value = azurerm_kubernetes_cluster.dev.oidc_issuer_url
 }
+
+output "stormbreaker-cluster-agentpool-mi" {
+  value = azurerm_kubernetes_cluster.dev.identity
+}
