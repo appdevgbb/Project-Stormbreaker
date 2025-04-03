@@ -24,11 +24,15 @@ output "aks_oidc_url" {
   value = module.aks.oidc_url
 }
 
-output "aks_managed_id" {
+output "user_assigned_identity" {
   value = {
     client_id = azurerm_user_assigned_identity.managed-id.client_id
     name      = azurerm_user_assigned_identity.managed-id.name
   }
+}
+
+output "stormbreaker-cluster-agentpool-identity" {
+  value = module.aks.stormbreaker-cluster-agentpool-mi
 }
 
 output "kubeconfig" {
@@ -60,3 +64,4 @@ output "azure_monitor_workspace_id" {
 output "servicebus_name" {
   value = azurerm_servicebus_namespace.stormbreaker-servicebus.name
 }
+

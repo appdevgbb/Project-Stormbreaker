@@ -94,7 +94,17 @@ terraformDance() {
   terraform init
   terraform plan -out tfplan
   terraform apply -auto-approve tfplan
-  terraform apply -auto-approve tfplan -var="temporary_allow_network=true" -var="enable_filesystem_creation=true"
+  
+  terraform apply \
+  -var="temporary_allow_network=true" \
+  -var="enable_filesystem_creation=true" \
+  -target=azurerm_storage_account.stormbreaker \
+  -target=azurerm_role_assignment.storage_blob_data_owner \
+  -target=azurerm_role_assignment.storage_contributor \
+  -target=azurerm_storage_data_lake_gen2_filesystem.filesystem \
+  -target=azurerm_storage_data_lake_gen2_filesystem.filesystem-out \
+  -target=azurerm_storage_data_lake_gen2_path.completed-jobs \
+  -target=azurerm_role_assignment.stormbreaker-storage-account
 }
 
 show() {
@@ -103,7 +113,9 @@ show() {
 
 destroy() {
   # remove all of the infrastructured
-  terraform destroy -auto-approve
+  load_env
+  
+  az group delete --name ${RESOURCE_GROUP_NAME} --yes
   rm -rf \
     terraform.tfstate \
     terraform.tfstate.backup \

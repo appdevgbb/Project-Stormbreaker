@@ -34,8 +34,8 @@ load_env() {
   export STORAGE_ACCOUNT=$(echo $TF_OUTPUTS | jq -r .storage_account_name.value)
   export CONTAINER_NAME=$(echo $TF_OUTPUTS | jq -r .container_name.value)
   export SERVICEBUS_NAME=$(echo $TF_OUTPUTS | jq -r .servicebus_name.value)
-  export USER_ASSIGNED_CLIENT_ID=$(echo $TF_OUTPUTS| jq -r .aks_managed_id.value.client_id)
-  export USER_ASSIGNED_CLIENT_NAME=$(echo $TF_OUTPUTS | jq -r .aks_managed_id.value.name)
+  export USER_ASSIGNED_CLIENT_ID=$(echo $TF_OUTPUTS| jq -r .user_assigned_identity.value.client_id)
+  export USER_ASSIGNED_CLIENT_NAME=$(echo $TF_OUTPUTS | jq -r .user_assigned_identity.value.name)
   export SUBSCRIPTION_ID=$(echo $TF_OUTPUTS | jq -r .azure_subscription.value.subscription_id)
   export TENANT_ID=$(echo $TF_OUTPUTS | jq -r .azure_subscription.value.tenant_id)
   echo "***************************************************"
@@ -105,7 +105,7 @@ EOF
   helm repo update bitnami
 
   # Install external dns
-  helm install external-dns bitnami/external-dns -f output/values.yaml
+  helm install external-dns bitnami/external-dns -f values.yaml
 }
 
 create_workload_id_sa() {
@@ -169,7 +169,7 @@ create_keda_template() {
 }
 
 do_generate_kubeconfig() {
-  terraform output -raw kubeconfig >config
+  terraform output -raw kubeconfig > config
 }
 
 enable_prometheus_integration() {
@@ -195,31 +195,43 @@ do_deploy_volcano() {
   kubectl apply -f https://raw.githubusercontent.com/volcano-sh/volcano/master/installer/volcano-development.yaml
 }
 
+# more info: https://azure.github.io/aks-rdma-infiniband/
 do_install_nvidia_operator() {
-  kubectl get namespace network-operator 2>/dev/null || kubectl create namespace network-operator
+  # kubectl get namespace network-operator 2>/dev/null || kubectl create namespace network-operator
 
+  # helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+  # helm repo update
+  # # Install node feature discovery
+  # helm upgrade \
+  #   --install \
+  #   --wait \
+  #   --create-namespace network-operator node-feature-discovery node-feature-discovery \
+  #   --repo https://kubernetes-sigs.github.io/node-feature-discovery/charts \
+  #   --set-json master.nodeSelector='{"kubernetes.azure.com/mode": "system"}' \
+  #   --set-json worker.nodeSelector='{"kubernetes.azure.com/agentpool": "adcirchpc"}' \
+  #   --set-json worker.config.sources.pci.deviceClassWhitelist='["02","03","0200","0207"]' \
+  #   --set-json worker.config.sources.pci.deviceLabelFields='["vendor"]'
+
+  # # Install the network-operator
+  # helm upgrade \
+  #   network-operator nvidia/network-operator \
+  #   --install \
+  #   --wait \
+  #   --repo https://helm.ngc.nvidia.com/nvidia \
+  #   --set deployCR=true \
+  #   --set nfd.enabled=false \
+  #   --set ofedDriver.deploy=true \
+  #   --set secondaryNetwork.deploy=false \
+  #   --set rdmaSharedDevicePlugin.deploy=true \
+  #   --set sriovDevicePlugin.deploy=true \
+  #   --set-json sriovDevicePlugin.resources='[{"name":"mlnxnics","linkTypes": ["infiniband"], "vendors":["15b3"]}]' 
   helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
   helm repo update
-  # Install node feature discovery
-  helm upgrade -i --wait \
-    --create-namespace network-operator node-feature-discovery node-feature-discovery \
-    --repo https://kubernetes-sigs.github.io/node-feature-discovery/charts \
-    --set-json master.nodeSelector='{"kubernetes.azure.com/mode": "system"}' \
-    --set-json worker.nodeSelector='{"kubernetes.azure.com/agentpool": "adcirchpc"}' \
-    --set-json worker.config.sources.pci.deviceClassWhitelist='["02","03","0200","0207"]' \
-    --set-json worker.config.sources.pci.deviceLabelFields='["vendor"]'
 
-  # Install the network-operator
-  helm upgrade -i --wait \
+  helm upgrade --install \
+    --create-namespace -n network-operator \
     network-operator nvidia/network-operator \
-    --repo https://helm.ngc.nvidia.com/nvidia \
-    --set deployCR=true \
-    --set nfd.enabled=false \
-    --set ofedDriver.deploy=true \
-    --set secondaryNetwork.deploy=false \
-    --set rdmaSharedDevicePlugin.deploy=true \
-    --set sriovDevicePlugin.deploy=true \
-    --set-json sriovDevicePlugin.resources='[{"name":"mlnxnics","linkTypes": ["infiniband"], "vendors":["15b3"]}]' 
+    --version v25.1.0
 }
 
 do_build_images() {
@@ -305,11 +317,11 @@ do_deploy_stormbreaker() {
 # we start here
 do_demo_bootstrap() {
   load_env
+  do_generate_kubeconfig
   create_stormbreaker_files
   create_keda_template
   create_external_dns
   # enable_prometheus_integration
-  do_generate_kubeconfig
   do_enable_cost_analysis
   do_deploy_volcano
   do_build_images

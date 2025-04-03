@@ -18,3 +18,4 @@ default/module-aks.tf
 default/dockerbuild/react-ui/crud-app/lib64
 default/dockerbuild/react-ui/crud-app/pyvenv.cfg
 **/build
+default/values.yaml

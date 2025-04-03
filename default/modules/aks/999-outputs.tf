@@ -17,5 +17,5 @@ output "oidc_url" {
 }
 
 output "stormbreaker-cluster-agentpool-mi" {
-  value = azurerm_kubernetes_cluster.dev.identity
+  value = azurerm_kubernetes_cluster.dev.kubelet_identity[0].client_id
 }

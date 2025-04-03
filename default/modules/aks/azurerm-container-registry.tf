@@ -33,8 +33,8 @@ resource "azurerm_private_endpoint" "acr" {
   }
 }
 
-resource "azurerm_role_assignment" "mi-access-to-acr" {
+resource "azurerm_role_assignment" "kubelet-access-to-acr" {
   scope                = var.container_registry_id
   role_definition_name = "AcrPull"
-  principal_id         = var.user_assigned_identity.principal_id
+ principal_id         =  azurerm_kubernetes_cluster.dev.kubelet_identity[0].object_id
 }
